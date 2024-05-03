@@ -1,7 +1,7 @@
 # QuantumSim
 This is a quantum computer simulator in python with several Jupyter notebooks to illustrate possible usage.
 
-The main purpose of this simulator is to explain the connection between quantum information theory and it's implementation in python code.
+The main purpose of this simulator is to explain the connection between quantum information theory and its implementation in python code.
 Intermediate quantum states are visualised to get insight in the effect of quantum operations on the state of a quantum circuit.
 A number of Jupyter notebooks with common quantum algorithms is provided.
 
