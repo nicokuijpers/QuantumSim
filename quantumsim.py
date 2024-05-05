@@ -68,10 +68,11 @@ class Dirac:
         return "|" + state_as_string + ">"
 
 
+"""
+Functions to obtain 2 x 2 unitary matrices for unitary qubit operations.
+"""
 class QubitUnitaryOperation:
-    """
-    Functions to obtain 2 x 2 unitary matrices for unitary qubit operations.
-    """
+    
     @staticmethod
     def get_identity():
         return np.array([[1,0],[0,1]],dtype=complex)
@@ -99,10 +100,11 @@ class QubitUnitaryOperation:
         return np.array([[1,0],[0,c]])
 
 
+"""
+Functions to obtain N x N unitary matrices for unitary operations on quantum circuits of N qubits.
+"""
 class CircuitUnitaryOperation:
-    """
-    Functions to obtain N x N unitary matrices for unitary operations on quantum circuits of N qubits.
-    """
+    
     @staticmethod
     def get_combined_operation_for_qubit(operation, q, N):
         identity = QubitUnitaryOperation.get_identity()
@@ -203,57 +205,6 @@ class CircuitUnitaryOperation:
         combined_operation_zero = np.kron(ket_bra_00,identity)
         combined_operation_one = np.kron(ket_bra_11,operation)
         return combined_operation_zero + combined_operation_one
-    
-    @staticmethod
-    def get_combined_operation_for_controlled_unitary_operation_general(operation, control, target, N):
-        # Qubit control is the control
-        # Qubit target is the first qubit on which the unitary operation will be applied
-        # N is total number of qubits (should be at least size of operation plus one)
-        # control < target and target + size(operation) <= N
-        identity = QubitUnitaryOperation.get_identity()
-        ket_bra_00 = Dirac.ket_bra(2,0,0)
-        ket_bra_11 = Dirac.ket_bra(2,1,1)
-        identity_operation = np.eye(*operation.shape)
-        combined_operation_zero = np.eye(1,1)
-        combined_operation_one = np.eye(1,1)
-        i = 0
-        while i < N:
-            if control == i:
-                #combined_operation_zero = np.kron(combined_operation_zero, ket_bra_00)
-                #combined_operation_one  = np.kron(combined_operation_one, ket_bra_11)
-                combined_operation_zero = np.kron(ket_bra_00, combined_operation_zero)
-                combined_operation_one  = np.kron(ket_bra_11, combined_operation_one)
-                i = i + 1
-            elif target == i:
-                #combined_operation_one  = np.kron(combined_operation_one, operation)
-                #combined_operation_zero = np.kron(combined_operation_zero, identity_operation)
-                combined_operation_zero = np.kron(identity_operation, combined_operation_zero)
-                combined_operation_one  = np.kron(operation, combined_operation_one)
-                i = i + math.log(operation.shape[0],2)
-            else:
-                #combined_operation_zero = np.kron(combined_operation_zero, identity)
-                #combined_operation_one  = np.kron(combined_operation_one, identity)
-                combined_operation_zero = np.kron(identity, combined_operation_zero)
-                combined_operation_one  = np.kron(identity, combined_operation_one)
-                i = i + 1
-        return combined_operation_zero + combined_operation_one
-    
-    @staticmethod
-    def get_combined_operation_for_unitary_operation_general(operation, target, N):
-        # Qubit target is the first qubit on which the unitary operation will be applied
-        # N is total number of qubits (should be at least size of operation)
-        # 0 <= target < N
-        identity = QubitUnitaryOperation.get_identity()
-        combined_operation = np.eye(1,1)
-        i = 0
-        while i < N:
-            if target == i:
-                combined_operation = np.kron(combined_operation, operation)
-                i = i + math.log(operation.shape[0],2)
-            else:
-                combined_operation = np.kron(combined_operation, identity)
-                i = i + 1
-        return combined_operation
 
     @staticmethod
     def get_combined_operation_for_fredkin(control, a, b, N):
@@ -316,10 +267,11 @@ class StateVector:
             print(f"{Dirac.state_as_string(i,self.N)} : {val[0]}")
 
 
+"""
+Class representing a quantum circuit of N qubits.
+"""
 class Circuit:
-    """
-    Class representing a quantum circuit of N qubits.
-    """
+    
     def __init__(self,N):
         self.N = N
         self.state_vector = StateVector(self.N)
@@ -453,144 +405,148 @@ class Circuit:
 
 
 """
-Function to run a quantum circuit and measure the classical state.
+Supporting functions execution, measuarement, and visualisation of intermediate quantum states.
 """
-def run_circuit(circuit:Circuit, nr_runs=1000):
-    result = []
-    for i in range(nr_runs):
+class QuantumUtil:
+    """
+    Function to run a quantum circuit and measure the classical state.
+    """
+    def run_circuit(circuit:Circuit, nr_runs=1000):
+        result = []
+        for i in range(nr_runs):
+            circuit.execute()
+            circuit.measure()
+            result.append(circuit.get_classical_state_as_string())
+        return result
+
+
+    """
+    Function to run a quantum circuit once and measure the classical state many times.
+    """
+    def measure_circuit(circuit:Circuit, nr_measurements=1000):
         circuit.execute()
-        circuit.measure()
-        result.append(circuit.get_classical_state_as_string())
-    return result
+        result = []
+        for i in range(nr_measurements):
+            circuit.measure()
+            result.append(circuit.get_classical_state_as_string())
+        return result
 
 
-"""
-Function to run a quantum circuit once and measure the classical state many times.
-"""
-def measure_circuit(circuit:Circuit, nr_measurements=1000):
-    circuit.execute()
-    result = []
-    for i in range(nr_measurements):
-        circuit.measure()
-        result.append(circuit.get_classical_state_as_string())
-    return result
+    """
+    Function to plot a histogram of all classical states after executing the circuit multiple times.
+    """
+    def histogram_of_classical_states(string_array):
+        histogram = Counter(string_array)
+        unique_strings = sorted(list(histogram.keys()))
+        counts = [histogram[string] for string in unique_strings]
+        plt.bar(unique_strings, counts)
+        if len(histogram) > 8:
+            plt.xticks(rotation='vertical')
+        plt.xlabel('Classical states')
+        plt.ylabel('Nr occurrences')
+        plt.title('Number of occurrences of classical states')
+        plt.show()
 
 
-"""
-Function to plot a histogram of all classical states after executing the circuit multiple times.
-"""
-def histogram_of_classical_states(string_array):
-    histogram = Counter(string_array)
-    unique_strings = sorted(list(histogram.keys()))
-    counts = [histogram[string] for string in unique_strings]
-    plt.bar(unique_strings, counts)
-    if len(histogram) > 8:
-        plt.xticks(rotation='vertical')
-    plt.xlabel('Classical states')
-    plt.ylabel('Nr occurrences')
-    plt.title('Number of occurrences of classical states')
-    plt.show()
+    """
+    Function to plot a all intermediate (quantum) states of the last execution of a circuit.
+    """
+    def show_all_intermediate_states(circuit:Circuit):
+        matrix_of_all_states = np.zeros((2**circuit.N, len(circuit.quantum_states)), dtype=complex)
+        i = 0
+        for state_vector in circuit.quantum_states:
+            matrix_of_all_states[:,i] = state_vector.flatten()
+            i = i + 1
 
+        fig_width  = 4 + circuit.N
+        fig_height = 4 + 0.5*len(circuit.operations)
+        fig, ax = plt.subplots()
+        fig.set_size_inches(fig_width, fig_height)
+        ax.patch.set_facecolor('gray')
+        ax.set_aspect('equal', 'box')
+        ax.xaxis.set_major_locator(plt.NullLocator())
+        ax.yaxis.set_major_locator(plt.NullLocator())
 
-"""
-Function to plot a all intermediate (quantum) states of the last execution of a circuit.
-"""
-def show_all_intermediate_states(circuit:Circuit):
-    matrix_of_all_states = np.zeros((2**circuit.N, len(circuit.quantum_states)), dtype=complex)
-    i = 0
-    for state_vector in circuit.quantum_states:
-        matrix_of_all_states[:,i] = state_vector.flatten()
-        i = i + 1
+        radius_circle = 0.45
+        length_arrow = 0.4
+        color_map = plt.get_cmap('jet')
 
-    fig_width  = 4 + circuit.N
-    fig_height = 4 + 0.5*len(circuit.operations)
-    fig, ax = plt.subplots()
-    fig.set_size_inches(fig_width, fig_height)
-    ax.patch.set_facecolor('gray')
-    ax.set_aspect('equal', 'box')
-    ax.xaxis.set_major_locator(plt.NullLocator())
-    ax.yaxis.set_major_locator(plt.NullLocator())
+        for (x, y), c in np.ndenumerate(matrix_of_all_states):
+            r = abs(c)
+            phase = cmath.phase(c)
+            color = color_map(int(r*256))
+            circle = plt.Circle([x + 0.5, y + 0.5], radius_circle, facecolor=color, edgecolor='black')
+            dx = length_arrow * np.cos(phase)
+            dy = length_arrow * np.sin(phase)
+            arrow = plt.Arrow(x + 0.5 - dx, y + 0.5 - dy, 2*dx, 2*dy, facecolor='lightgray', edgecolor='black')
+            ax.add_patch(circle)
+            ax.add_patch(arrow)
 
-    radius_circle = 0.45
-    length_arrow = 0.4
-    color_map = plt.get_cmap('jet')
+        ax.autoscale_view()
+        ax.invert_yaxis()
 
-    for (x, y), c in np.ndenumerate(matrix_of_all_states):
-        r = abs(c)
-        phase = cmath.phase(c)
-        color = color_map(int(r*256))
-        circle = plt.Circle([x + 0.5, y + 0.5], radius_circle, facecolor=color, edgecolor='black')
-        dx = length_arrow * np.cos(phase)
-        dy = length_arrow * np.sin(phase)
-        arrow = plt.Arrow(x + 0.5 - dx, y + 0.5 - dy, 2*dx, 2*dy, facecolor='lightgray', edgecolor='black')
-        ax.add_patch(circle)
-        ax.add_patch(arrow)
+        positions_x = []
+        all_states_as_string = []
+        for i in range(0,2**circuit.N):
+            positions_x.append(i + 0.5)
+            all_states_as_string.append(Dirac.state_as_string(i,circuit.N))
+        plt.xticks(positions_x, all_states_as_string, rotation='vertical')
 
-    ax.autoscale_view()
-    ax.invert_yaxis()
-
-    positions_x = []
-    all_states_as_string = []
-    for i in range(0,2**circuit.N):
-        positions_x.append(i + 0.5)
-        all_states_as_string.append(Dirac.state_as_string(i,circuit.N))
-    plt.xticks(positions_x, all_states_as_string, rotation='vertical')
-
-    j = 0.5
-    positions_y = [j]
-    all_operations_as_string = ['Initial state']
-    j = j + 1
-    for description in circuit.descriptions:
-        positions_y.append(j)
-        all_operations_as_string.append(description)
+        j = 0.5
+        positions_y = [j]
+        all_operations_as_string = ['Initial state']
         j = j + 1
-    plt.yticks(positions_y, all_operations_as_string)
+        for description in circuit.descriptions:
+            positions_y.append(j)
+            all_operations_as_string.append(description)
+            j = j + 1
+        plt.yticks(positions_y, all_operations_as_string)
 
 
-"""
-Function to plot a all intermediate probabilities of the last execution of a circuit.
-"""
-def show_all_pobrabilities(circuit:Circuit):
-    matrix_of_probabilities = np.zeros((2**circuit.N,len(circuit.quantum_states)))
-    i = 0
-    for state_vector in circuit.quantum_states:
-        probalities = np.square(np.abs(state_vector)).flatten()
-        matrix_of_probabilities[:,i] = probalities
-        i = i + 1
+    """
+    Function to plot a all intermediate probabilities of the last execution of a circuit.
+    """
+    def show_all_pobrabilities(circuit:Circuit):
+        matrix_of_probabilities = np.zeros((2**circuit.N,len(circuit.quantum_states)))
+        i = 0
+        for state_vector in circuit.quantum_states:
+            probalities = np.square(np.abs(state_vector)).flatten()
+            matrix_of_probabilities[:,i] = probalities
+            i = i + 1
 
-    fig_width  = 4 + circuit.N
-    fig_height = 4 + 0.5*len(circuit.operations)
-    fig, ax = plt.subplots()
-    fig.set_size_inches(fig_width, fig_height)
-    ax.patch.set_facecolor('gray')
-    ax.set_aspect('equal', 'box')
-    ax.xaxis.set_major_locator(plt.NullLocator())
-    ax.yaxis.set_major_locator(plt.NullLocator())
+        fig_width  = 4 + circuit.N
+        fig_height = 4 + 0.5*len(circuit.operations)
+        fig, ax = plt.subplots()
+        fig.set_size_inches(fig_width, fig_height)
+        ax.patch.set_facecolor('gray')
+        ax.set_aspect('equal', 'box')
+        ax.xaxis.set_major_locator(plt.NullLocator())
+        ax.yaxis.set_major_locator(plt.NullLocator())
 
-    size = 0.9
-    color_map = plt.get_cmap('jet')
+        size = 0.9
+        color_map = plt.get_cmap('jet')
 
-    for (x, y), w in np.ndenumerate(matrix_of_probabilities):
-        color = color_map(int(w*256))
-        rect = plt.Rectangle([x - size/2, y - size/2], size, size,
-                            facecolor=color, edgecolor='black')
-        ax.add_patch(rect)
+        for (x, y), w in np.ndenumerate(matrix_of_probabilities):
+            color = color_map(int(w*256))
+            rect = plt.Rectangle([x - size/2, y - size/2], size, size,
+                                facecolor=color, edgecolor='black')
+            ax.add_patch(rect)
 
-    ax.autoscale_view()
-    ax.invert_yaxis()
-        
-    positions_x = []
-    all_states_as_string = []
-    for i in range(0,2**circuit.N):
-        positions_x.append(i)
-        all_states_as_string.append(Dirac.state_as_string(i, circuit.N))
-    plt.xticks(positions_x, all_states_as_string, rotation='vertical')
+        ax.autoscale_view()
+        ax.invert_yaxis()
+            
+        positions_x = []
+        all_states_as_string = []
+        for i in range(0,2**circuit.N):
+            positions_x.append(i)
+            all_states_as_string.append(Dirac.state_as_string(i, circuit.N))
+        plt.xticks(positions_x, all_states_as_string, rotation='vertical')
 
-    positions_y = [0]
-    all_operations_as_string = ['Initial state']
-    j = 1
-    for description in circuit.descriptions:
-        positions_y.append(j)
-        all_operations_as_string.append(description)
-        j = j + 1
-    plt.yticks(positions_y, all_operations_as_string)
+        positions_y = [0]
+        all_operations_as_string = ['Initial state']
+        j = 1
+        for description in circuit.descriptions:
+            positions_y.append(j)
+            all_operations_as_string.append(description)
+            j = j + 1
+        plt.yticks(positions_y, all_operations_as_string)
