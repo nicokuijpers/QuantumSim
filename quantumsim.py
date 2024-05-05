@@ -405,7 +405,7 @@ class Circuit:
 
 
 """
-Supporting functions execution, measuarement, and visualisation of intermediate quantum states.
+Supporting functions execution, measurement, and visualisation of intermediate quantum states.
 """
 class QuantumUtil:
     """
@@ -506,7 +506,7 @@ class QuantumUtil:
     """
     Function to plot a all intermediate probabilities of the last execution of a circuit.
     """
-    def show_all_pobrabilities(circuit:Circuit):
+    def show_all_probabilities(circuit:Circuit):
         matrix_of_probabilities = np.zeros((2**circuit.N,len(circuit.quantum_states)))
         i = 0
         for state_vector in circuit.quantum_states:
