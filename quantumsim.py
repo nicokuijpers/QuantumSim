@@ -235,11 +235,11 @@ class CircuitUnitaryOperation:
         combined_operation[2**N-1,2**N-1] = 1 - combined_operation[2**N-1,2**N-1]
         return combined_operation
 
-
+"""
+Class representing a quantum circuit of N qubits.
+"""
 class StateVector:
-    """
-    Class representing a quantum circuit of N qubits.
-    """
+    
     def __init__(self, N):
         self.N = N
         self.index = 0
@@ -405,7 +405,7 @@ class Circuit:
 
 
 """
-Supporting for functions execution, measurement, and visualisation of intermediate quantum states.
+Supporting functions for execution, measurement, and visualisation of intermediate quantum states.
 """
 class QuantumUtil:
     """
