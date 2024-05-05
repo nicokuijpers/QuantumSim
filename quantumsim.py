@@ -405,7 +405,7 @@ class Circuit:
 
 
 """
-Supporting functions execution, measurement, and visualisation of intermediate quantum states.
+Supporting for functions execution, measurement, and visualisation of intermediate quantum states.
 """
 class QuantumUtil:
     """
