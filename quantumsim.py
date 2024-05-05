@@ -16,7 +16,6 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -24,26 +23,17 @@ import cmath
 import random
 from collections import Counter
 
-"""
-Function to convert integer i, 0 <= i < N, to a quantum state in Dirac notation.
-"""
-def state_as_string(i,N):
-    if i < 0 or i >= 2**N:
-        raise ValueError("Input i and N must satisfy 0 <= i < 2^N")
 
-    binary_string = bin(i)
-    state_as_string = binary_string[2:]
-    state_as_string = state_as_string.zfill(N)
-    return "|" + state_as_string + ">"
-
+"""
+Functions for the Dirac notation to describe (quantum) states and (quantum) operators.
+|a> is called 'ket' and represents a column vector with 1 in entry a and 0 everywhere else.
+<a| is called 'bra' and represents a row vector with 1 in entry a and 0 everywhere else.
+<a||b> is the inner product of <a| and |b>, which is 1 if a = b and 0 if a != b.
+|a><b| is the outer product of |a> and <b|, which is a matrix with 1 in entry (a,b) and 0 everywhere else.
+Function state_as_string converts integer i, 0 <= i < N, to a quantum state in Dirac notation.
+"""
 class Dirac:
-    """
-    Functions for the Dirac notation to describe (quantum) states and (quantum) operators.
-    |a> is called 'ket' and represents a column vector with 1 in entry a and 0 everywhere else.
-    <a| is called 'bra' and represents a row vector with 1 in entry a and 0 everywhere else.
-    <a||b> is the inner product of <a| and |b>, which is 1 if a = b and 0 if a != b.
-    |a><b| is the outer product of |a> and <b|, which is a matrix with 1 in entry (a,b) and 0 everywhere else.
-    """
+    
     @staticmethod
     def ket(N, a):
         ket = np.zeros((N, 1))
@@ -67,6 +57,15 @@ class Dirac:
         ket = Dirac.ket(N, a)
         bra = Dirac.bra(N, b)
         return np.outer(ket, bra)
+    
+    @staticmethod
+    def state_as_string(i,N):
+        if i < 0 or i >= 2**N:
+            raise ValueError("Input i and N must satisfy 0 <= i < 2^N")
+
+        binary_string = bin(i)
+        state_as_string = binary_string[2:].zfill(N)
+        return "|" + state_as_string + ">"
 
 
 class QubitUnitaryOperation:
@@ -310,11 +309,11 @@ class StateVector:
         return self.state_vector
 
     def get_classical_state_as_string(self):
-        return state_as_string(self.index, self.N)
+        return Dirac.state_as_string(self.index, self.N)
     
     def print(self):
         for i, val in enumerate(self.state_vector):
-            print(f"{state_as_string(i,self.N)} : {val[0]}")
+            print(f"{Dirac.state_as_string(i,self.N)} : {val[0]}")
 
 
 class Circuit:
@@ -534,7 +533,7 @@ def show_all_intermediate_states(circuit:Circuit):
     all_states_as_string = []
     for i in range(0,2**circuit.N):
         positions_x.append(i + 0.5)
-        all_states_as_string.append(state_as_string(i,circuit.N))
+        all_states_as_string.append(Dirac.state_as_string(i,circuit.N))
     plt.xticks(positions_x, all_states_as_string, rotation='vertical')
 
     j = 0.5
@@ -584,7 +583,7 @@ def show_all_pobrabilities(circuit:Circuit):
     all_states_as_string = []
     for i in range(0,2**circuit.N):
         positions_x.append(i)
-        all_states_as_string.append(state_as_string(i, circuit.N))
+        all_states_as_string.append(Dirac.state_as_string(i, circuit.N))
     plt.xticks(positions_x, all_states_as_string, rotation='vertical')
 
     positions_y = [0]
