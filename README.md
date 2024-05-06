@@ -1,9 +1,19 @@
 # QuantumSim
-This is a quantum computer simulator in python with several Jupyter notebooks to illustrate possible usage.
+This is a quantum computer simulator in Python with several Jupyter notebooks to illustrate possible usage.
 
 The main purpose of this simulator is to explain the connection between quantum information theory and its implementation in Python code.
 Intermediate quantum states are visualised to get insight in the effect of quantum operations on the state of a quantum circuit.
 A number of Jupyter notebooks with common quantum algorithms is provided.
+
+Contents of this repository:
+
+| File | Description |
+|------|-------------|
+| [quantumsim.py](https://github.com/nicokuijpers/QuantumSim/blob/main/quantumsim.py) | Contains the Python code of QuantumSim |
+| [QuantumSimIntroduction.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimIntroduction.ipynb) | Introduction to QuantumSim |
+| [QuantumSimVisualization.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimVisualization.ipynb) | Visualisation of intermediate quantum states |
+| [QuantumSimMoreOperations.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimMoreOperations.ipynb) | More quantum operations with examples |
+| [QuantumSimBellStates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBellStates.ipynb) | Implementation of the four Bell states |
 
 Copyright (c) 2024 Nico Kuijpers
 
