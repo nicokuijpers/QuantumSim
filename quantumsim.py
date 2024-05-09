@@ -361,6 +361,13 @@ class Circuit:
         self.descriptions.append(f"Multi-controlled Pauli_X")
         self.operations.append(combined_operation)
 
+    """
+    Swap the registers such that the most significant qubit becomes the least significant qubit and vice versa.
+    """
+    def swap_registers(self):
+        for q in range(self.N//2):
+            self.swap(q, self.N-q-1)
+
     def create_inverse_circuit(self):
         inverse_circuit = Circuit(self.N)
         for operation, description in zip(reversed(self.operations), reversed(self.descriptions)):
@@ -405,12 +412,56 @@ class Circuit:
 
 
 """
+Circuit creation for quantum Fourier transform (QFT) and inverse quantum Fourier transform (iQFT).
+"""
+class QuantumFourier:
+    """
+    Private function to 
+    """
+    @staticmethod
+    def __qft_rotations(circuit:Circuit, n):
+        if n == 0:
+            return circuit
+        
+        # Apply Hadamard operation to the most significant qubit
+        circuit.hadamard(n-1) 
+        for qubit in range(n-1):
+            # For each less significant qubit, a controlled rotation
+            # is applied with a smaller angle.
+            circuit.controlled_phase(-np.pi/2**(n-1-qubit), qubit, n-1)
+        
+        # Recursive function call with n-1
+        QuantumFourier.__qft_rotations(circuit, n-1)
+
+
+    """
+    Function to create a circuit for quantum Fourier transform (QFT)
+    """
+    @staticmethod
+    def create_qft_circuit(N):
+        circuit = Circuit(N)
+        QuantumFourier.__qft_rotations(circuit, N)
+        circuit.swap_registers()
+        return circuit
+
+    """
+    Function to create a circuit for inverse quantum Fourier transform (QFT)
+    """
+    @staticmethod
+    def create_iqft_circuit(N):
+        circuit = QuantumFourier.create_qft_circuit(N)
+        return circuit.create_inverse_circuit()
+
+
+
+"""
 Supporting functions for execution, measurement, and visualisation of intermediate quantum states.
 """
 class QuantumUtil:
     """
     Function to run a quantum circuit and measure the classical state.
     """
+    @staticmethod
     def run_circuit(circuit:Circuit, nr_runs=1000):
         result = []
         for i in range(nr_runs):
@@ -423,6 +474,7 @@ class QuantumUtil:
     """
     Function to run a quantum circuit once and measure the classical state many times.
     """
+    @staticmethod
     def measure_circuit(circuit:Circuit, nr_measurements=1000):
         circuit.execute()
         result = []
@@ -435,6 +487,7 @@ class QuantumUtil:
     """
     Function to plot a histogram of all classical states after executing the circuit multiple times.
     """
+    @staticmethod
     def histogram_of_classical_states(string_array):
         histogram = Counter(string_array)
         unique_strings = sorted(list(histogram.keys()))
@@ -451,6 +504,7 @@ class QuantumUtil:
     """
     Function to plot a all intermediate (quantum) states of the last execution of a circuit.
     """
+    @staticmethod
     def show_all_intermediate_states(circuit:Circuit):
         matrix_of_all_states = np.zeros((2**circuit.N, len(circuit.quantum_states)), dtype=complex)
         i = 0
@@ -506,6 +560,7 @@ class QuantumUtil:
     """
     Function to plot a all intermediate probabilities of the last execution of a circuit.
     """
+    @staticmethod
     def show_all_probabilities(circuit:Circuit):
         matrix_of_probabilities = np.zeros((2**circuit.N,len(circuit.quantum_states)))
         i = 0
