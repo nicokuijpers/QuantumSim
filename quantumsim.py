@@ -197,16 +197,6 @@ class CircuitUnitaryOperation:
         return np.dot(np.dot(combined_operation_cnot_a_b,combined_operation_cnot_b_a),combined_operation_cnot_a_b)
     
     @staticmethod
-    def get_combined_operation_for_controlled_unitary_operation(operation):
-        # Qubit 0 is the control
-        identity = np.eye(*operation.shape)
-        ket_bra_00 = Dirac.ket_bra(2,0,0)
-        ket_bra_11 = Dirac.ket_bra(2,1,1)
-        combined_operation_zero = np.kron(ket_bra_00,identity)
-        combined_operation_one = np.kron(ket_bra_11,operation)
-        return combined_operation_zero + combined_operation_one
-
-    @staticmethod
     def get_combined_operation_for_fredkin(control, a, b, N):
         combined_operation_swap_control_0 = CircuitUnitaryOperation.get_combined_operation_for_swap(control, 0, N)
         combined_operation_swap_a_b = CircuitUnitaryOperation.get_combined_operation_for_swap(a-1, b-1, N-1)
@@ -220,6 +210,63 @@ class CircuitUnitaryOperation:
         combined_operation_toffoli = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation(combined_operation_cnot_a_b)
         return np.dot(np.dot(combined_operation_swap_control_0, combined_operation_toffoli), combined_operation_swap_control_0)
     
+    @staticmethod
+    def get_combined_operation_for_unitary_operation_general(operation, target, N):
+        # Qubit target is the first qubit on which the unitary operation will be applied
+        # N is total number of qubits (should be at least size of operation)
+        # 0 <= target < N
+        identity = QubitUnitaryOperation.get_identity()
+        combined_operation = np.eye(1,1)
+        i = 0
+        while i < N:
+            if target == i:
+                combined_operation = np.kron(combined_operation, operation)
+                i = i + math.log(operation.shape[0],2)
+            else:
+                combined_operation = np.kron(combined_operation, identity)
+                i = i + 1
+        return combined_operation
+
+
+    @staticmethod
+    def get_combined_operation_for_controlled_unitary_operation(operation):
+        # Qubit 0 is the control
+        identity = np.eye(*operation.shape)
+        ket_bra_00 = Dirac.ket_bra(2,0,0)
+        ket_bra_11 = Dirac.ket_bra(2,1,1)
+        combined_operation_zero = np.kron(ket_bra_00,identity)
+        combined_operation_one = np.kron(ket_bra_11,operation)
+        return combined_operation_zero + combined_operation_one
+    
+    @staticmethod
+    def get_combined_operation_for_controlled_unitary_operation_general(operation, control, target, N):
+        # Qubit control is the control
+        # Qubit target is the first qubit on which the unitary operation will be applied
+        # N is total number of qubits (should be at least size of operation plus one)
+        # control < target and target + size(operation) <= N
+        identity = QubitUnitaryOperation.get_identity()
+        ket_bra_00 = Dirac.ket_bra(2,0,0)
+        ket_bra_11 = Dirac.ket_bra(2,1,1)
+        identity_operation = np.eye(*operation.shape)
+        combined_operation_zero = np.eye(1,1)
+        combined_operation_one = np.eye(1,1)
+        i = 0
+        while i < N:
+            if control == i:
+                combined_operation_zero = np.kron(ket_bra_00, combined_operation_zero)
+                combined_operation_one  = np.kron(ket_bra_11, combined_operation_one)
+                i = i + 1
+            elif target == i:
+                combined_operation_zero = np.kron(identity_operation, combined_operation_zero)
+                combined_operation_one  = np.kron(operation, combined_operation_one)
+                i = i + math.log(operation.shape[0],2)
+            else:
+                combined_operation_zero = np.kron(identity, combined_operation_zero)
+                combined_operation_one  = np.kron(identity, combined_operation_one)
+                i = i + 1
+        return combined_operation_zero + combined_operation_one
+    
+
     @staticmethod
     def get_combined_operation_for_multi_controlled_pauli_z_operation(N):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_identity(N)
@@ -368,6 +415,20 @@ class Circuit:
         for q in range(self.N//2):
             self.swap(q, self.N-q-1)
 
+    """
+    Create a controlled version of this circuit.
+    """
+    def create_controlled_circuit(self, control, target, nr_qubits):
+        # control is control qubit
+        # target is qubit in new circuit corresponding to first qubit of current circuit
+        # nr_qubits is number of qubits in new circuit
+        controlled_circuit = Circuit(nr_qubits)
+        for operation, description in zip(self.operations, self.descriptions):
+            combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation_general(operation, control, target, nr_qubits)
+            controlled_circuit.operations.append(combined_operation)
+            controlled_circuit.descriptions.append(f"Controlled unitary operation {description}")
+        return controlled_circuit
+
     def create_inverse_circuit(self):
         inverse_circuit = Circuit(self.N)
         for operation, description in zip(reversed(self.operations), reversed(self.descriptions)):
@@ -381,6 +442,14 @@ class Circuit:
         for operation, description in zip(circuit.operations, circuit.descriptions):
             self.operations.append(operation)
             self.descriptions.append(description)
+
+    def append_circuit_general(self, circuit, start):
+        if circuit.N > self.N:
+            raise ValueError("Function append_circuit_general: circuit to be appended must have less or same number of qubits")
+        for operation, description in zip(circuit.operations, circuit.descriptions):
+            combined_operation = CircuitUnitaryOperation.get_combined_operation_for_unitary_operation_general(operation, start, self.N)
+            self.operations.append(combined_operation)
+            self.descriptions.append(f"Append operation {description}")
     
     def print_circuit(self):
         for description in self.descriptions:
@@ -438,18 +507,19 @@ class QuantumFourier:
     Function to create a circuit for quantum Fourier transform (QFT)
     """
     @staticmethod
-    def create_qft_circuit(N):
+    def create_qft_circuit(N, swap_registers=False):
         circuit = Circuit(N)
         QuantumFourier.__qft_rotations(circuit, N)
-        circuit.swap_registers()
+        if swap_registers:
+            circuit.swap_registers()
         return circuit
 
     """
     Function to create a circuit for inverse quantum Fourier transform (QFT)
     """
     @staticmethod
-    def create_iqft_circuit(N):
-        circuit = QuantumFourier.create_qft_circuit(N)
+    def create_iqft_circuit(N, swap_registers=False):
+        circuit = QuantumFourier.create_qft_circuit(N, swap_registers=swap_registers)
         return circuit.create_inverse_circuit()
 
 
