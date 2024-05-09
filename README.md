@@ -15,6 +15,7 @@ Contents of this repository:
 | [QuantumSimMoreOperations.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimMoreOperations.ipynb) | More quantum operations with examples |
 | [QuantumSimBellStates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBellStates.ipynb) | Implementation of the four Bell states |
 | [QuantumSimFourierTransform.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimFourierTransform.ipynb) | Quantum Fourier Transform (QFT) and inverse QFT |
+| [QuantumSimGroverAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimGroverAlgorithm.ipynb) | Grover's Algorithm |
 
 Copyright (c) 2024 Nico Kuijpers
 
