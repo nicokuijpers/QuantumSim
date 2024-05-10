@@ -283,7 +283,7 @@ class CircuitUnitaryOperation:
         return combined_operation
 
 """
-Class representing a quantum circuit of N qubits.
+Class representing the quantum state of a quantum circuit of N qubits.
 """
 class StateVector:
     
