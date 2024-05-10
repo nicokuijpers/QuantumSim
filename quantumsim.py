@@ -253,20 +253,14 @@ class CircuitUnitaryOperation:
         i = 0
         while i < N:
             if control == i:
-                #combined_operation_zero = np.kron(ket_bra_00, combined_operation_zero)
-                #combined_operation_one  = np.kron(ket_bra_11, combined_operation_one)
                 combined_operation_zero = np.kron(combined_operation_zero, ket_bra_00)
                 combined_operation_one  = np.kron(combined_operation_one, ket_bra_11)
                 i = i + 1
             elif target == i:
-                #combined_operation_zero = np.kron(identity_operation, combined_operation_zero)
-                #combined_operation_one  = np.kron(operation, combined_operation_one)
                 combined_operation_zero = np.kron(combined_operation_zero, identity_operation)
                 combined_operation_one  = np.kron(combined_operation_one, operation)
                 i = i + math.log(operation.shape[0],2)
             else:
-                #combined_operation_zero = np.kron(identity, combined_operation_zero)
-                #combined_operation_one  = np.kron(identity, combined_operation_one)
                 combined_operation_zero = np.kron(combined_operation_zero, identity)
                 combined_operation_one  = np.kron(combined_operation_one, identity)
                 i = i + 1
