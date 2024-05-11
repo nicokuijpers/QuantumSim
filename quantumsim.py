@@ -18,11 +18,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import math
 import cmath
 import random
 from collections import Counter
 
+# Set the default font family to Courier to ensure a monospaced font for labels of axes in figures
+matplotlib.rcParams['font.family'] = 'Courier'
 
 """
 Functions for the Dirac notation to describe (quantum) states and (quantum) operators.
@@ -473,7 +476,7 @@ class Circuit:
         gate_as_list[control_a] = '*'
         gate_as_list[control_b] = '*'
         gate_as_list[target] = 'x'
-        gate_as_string = ''.join(gate_as_string)
+        gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
     
     def multi_controlled_pauli_z(self):
@@ -487,8 +490,10 @@ class Circuit:
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_multi_controlled_pauli_x_operation(self.N)
         self.descriptions.append(f"Multi-controlled Pauli_X")
         self.operations.append(combined_operation)
-        gate_as_string = '*'*(self.N - 1)
-        gate_as_string.append('X')
+        gate_as_string = '*'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[self.N-1] = 'X'
+        gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
     """
@@ -513,7 +518,7 @@ class Circuit:
             gate_as_string = '.'*controlled_circuit.N
             gate_as_list = list(gate_as_string)
             gate_as_list[control] = '*'
-            # gate_as_list[target:target + len(gate)] = gate # TODO
+            gate_as_list[target:target + len(gate)] = list(gate)
             gate_as_string = ''.join(gate_as_list)
             controlled_circuit.gates.append(gate_as_string)
         return controlled_circuit
@@ -542,7 +547,9 @@ class Circuit:
             self.operations.append(combined_operation)
             self.descriptions.append(f"Append operation {description}")
             gate_as_string = '.'*self.N
-            # gate_as_string[start:start + len(gate)] = gate # TODO
+            gate_as_list = list(gate_as_string)
+            gate_as_list[start:start + len(gate)] = list(gate)
+            gate_as_string = ''.join(gate_as_list)
             self.gates.append(gate_as_string)
     
     def print_circuit(self):
@@ -673,7 +680,7 @@ class QuantumUtil:
     Function to plot a all intermediate (quantum) states of the last execution of a circuit.
     """
     @staticmethod
-    def show_all_intermediate_states(circuit:Circuit):
+    def show_all_intermediate_states(circuit:Circuit, show_description=True, show_colorbar=True):
         matrix_of_all_states = np.zeros((2**circuit.N, len(circuit.quantum_states)), dtype=complex)
         i = 0
         for state_vector in circuit.quantum_states:
@@ -692,6 +699,7 @@ class QuantumUtil:
         radius_circle = 0.45
         length_arrow = 0.4
         color_map = plt.get_cmap('jet')
+        norm = plt.Normalize(vmin=0, vmax=1)
 
         for (x, y), c in np.ndenumerate(matrix_of_all_states):
             r = abs(c)
@@ -716,20 +724,37 @@ class QuantumUtil:
 
         j = 0.5
         positions_y = [j]
-        all_operations_as_string = ['Initial state']
+        if show_description:
+            all_operations_as_string = ['Initial state  ' + '.'*circuit.N]
+        else:
+            all_operations_as_string = ['.'*circuit.N]
         j = j + 1
-        for description in circuit.descriptions:
+        for description, gate in zip(circuit.descriptions, circuit.gates):
             positions_y.append(j)
-            all_operations_as_string.append(description)
+            if show_description:
+                all_operations_as_string.append(f"{description}  {gate}")
+            else:
+                all_operations_as_string.append(f"{gate}")
             j = j + 1
         plt.yticks(positions_y, all_operations_as_string)
+
+        if show_colorbar:
+            sm = plt.cm.ScalarMappable(cmap=color_map, norm=norm)
+            sm.set_array([])
+            ax = plt.gca()
+            divider = ax.get_position()
+            shrink = divider.height
+            cbar = plt.colorbar(sm, ax=ax, shrink=shrink)
+        
+        plt.title('Intermediate quantum states')
+        plt.show()
 
 
     """
     Function to plot a all intermediate probabilities of the last execution of a circuit.
     """
     @staticmethod
-    def show_all_probabilities(circuit:Circuit):
+    def show_all_probabilities(circuit:Circuit, show_description=True, show_colorbar=True):
         matrix_of_probabilities = np.zeros((2**circuit.N,len(circuit.quantum_states)))
         i = 0
         for state_vector in circuit.quantum_states:
@@ -748,6 +773,7 @@ class QuantumUtil:
 
         size = 0.9
         color_map = plt.get_cmap('jet')
+        norm = plt.Normalize(vmin=0, vmax=1)
 
         for (x, y), w in np.ndenumerate(matrix_of_probabilities):
             color = color_map(int(w*256))
@@ -766,10 +792,27 @@ class QuantumUtil:
         plt.xticks(positions_x, all_states_as_string, rotation='vertical')
 
         positions_y = [0]
-        all_operations_as_string = ['Initial state']
+        if show_description:
+            all_operations_as_string = ['Initial state  ' + '.'*circuit.N]
+        else:
+            all_operations_as_string = ['.'*circuit.N]
         j = 1
         for description, gate in zip(circuit.descriptions, circuit.gates):
             positions_y.append(j)
-            all_operations_as_string.append(f"{description} {gate}")
+            if show_description:
+                all_operations_as_string.append(f"{description}  {gate}")
+            else:
+                all_operations_as_string.append(f"{gate}")
             j = j + 1
         plt.yticks(positions_y, all_operations_as_string)
+
+        if show_colorbar:
+            sm = plt.cm.ScalarMappable(cmap=color_map, norm=norm)
+            sm.set_array([])
+            ax = plt.gca()
+            divider = ax.get_position()
+            shrink = divider.height
+            cbar = plt.colorbar(sm, ax=ax, shrink=shrink)
+        
+        plt.title('Intermediate probabilities')
+        plt.show()
