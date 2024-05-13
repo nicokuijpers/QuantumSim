@@ -590,7 +590,7 @@ Circuit creation for quantum Fourier transform (QFT) and inverse quantum Fourier
 """
 class QuantumFourier:
     """
-    Private function to 
+    Private function to rotate the qubits of a circuit for quantum Fourier transform (QFT)
     """
     @staticmethod
     def __qft_rotations(circuit:Circuit, n):
