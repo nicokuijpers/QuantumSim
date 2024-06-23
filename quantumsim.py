@@ -23,6 +23,7 @@ import math
 import cmath
 import random
 from collections import Counter
+from scipy.linalg import expm
 
 # Set the default font family to Courier to ensure a monospaced font for labels of axes in figures
 matplotlib.rcParams['font.family'] = 'Courier'
@@ -101,6 +102,21 @@ class QubitUnitaryOperation:
     def get_phase(theta):
         c = complex(np.cos(theta),np.sin(theta))
         return np.array([[1,0],[0,c]])
+    
+    @staticmethod
+    def get_rotate_x(theta):
+        X = QubitUnitaryOperation.get_pauli_x()
+        return expm(-1j * theta / 2 * X)
+    
+    @staticmethod
+    def get_rotate_y(theta):
+        Y = QubitUnitaryOperation.get_pauli_y()
+        return expm(-1j * theta / 2 * Y)
+    
+    @staticmethod
+    def get_rotate_z(theta):
+        Z = QubitUnitaryOperation.get_pauli_z()
+        return expm(-1j * theta / 2 * Z)
 
 
 """
@@ -284,7 +300,7 @@ class CircuitUnitaryOperation:
         combined_operation[2**N-1,2**N-2] = 1 - combined_operation[2**N-1,2**N-2]
         combined_operation[2**N-1,2**N-1] = 1 - combined_operation[2**N-1,2**N-1]
         return combined_operation
-
+    
 """
 Class representing the quantum state of a quantum circuit of N qubits.
 """
@@ -302,8 +318,33 @@ class StateVector:
             raise ValueError("Input matrix is not unitary")
         self.state_vector = np.dot(operation, self.state_vector)
 
+    def apply_noisy_operation(self, operation):
+        # A noisy operation does not have to be a unitary matrix
+        self.state_vector = np.dot(operation, self.state_vector)
+
+    def measure_x(self, q):
+        # Compute the real part of <psi|X|psi>
+        X = CircuitUnitaryOperation.get_combined_operation_for_pauli_x(q, self.N)
+        return np.vdot(self.state_vector, X.dot(self.state_vector)).real
+    
+    def measure_y(self, q):
+        # Compute the real part of <psi|Y|psi>
+        Y = CircuitUnitaryOperation.get_combined_operation_for_pauli_y(q, self.N)
+        return np.vdot(self.state_vector, Y.dot(self.state_vector)).real
+
+    def measure_z(self, q):
+        # Compute the real part of <psi|Z|psi>
+        Z = CircuitUnitaryOperation.get_combined_operation_for_pauli_z(q, self.N)
+        return np.vdot(self.state_vector, Z.dot(self.state_vector)).real
+
     def measure(self):
         probalities = np.square(np.abs(self.state_vector)).flatten()
+        self.index = np.random.choice(len(probalities), p=probalities)
+
+    def noisy_measure(self):
+        # For a noisy circuit, the sum of probabilities may not be equal to one
+        probalities = np.square(np.abs(self.state_vector)).flatten()
+        probalities = probalities / np.sum(probalities)
         self.index = np.random.choice(len(probalities), p=probalities)
 
     def get_quantum_state(self):
@@ -315,7 +356,6 @@ class StateVector:
     def print(self):
         for i, val in enumerate(self.state_vector):
             print(f"{Dirac.state_as_string(i,self.N)} : {val[0]}")
-
 
 """
 Class representing a quantum circuit of N qubits.
@@ -331,7 +371,7 @@ class Circuit:
         self.gates = []
 
     def identity(self, q):
-        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_identity(q, self.N)
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_identity(self.N)
         self.descriptions.append(f"Identity on qubit {q}")
         self.operations.append(combined_operation)
         gate_as_string = '.'*self.N
@@ -584,6 +624,123 @@ class Circuit:
     def get_classical_state_as_string(self):
         return self.state_vector.get_classical_state_as_string()
 
+'''
+Class representing a noisy quantum circuit of N qubits.
+Inherits from Circuit.
+'''
+class NoisyCircuit(Circuit):
+    def __init__(self,N):
+        super().__init__(N)
+        self.state_vector = StateVector(self.N)
+        self.noisy_operations_state_prep = []
+        self.noisy_operations_incoherent = []
+        self.noisy_operations_readout = []
+        self.x_measures = np.empty(self.N, dtype=object)
+        self.y_measures = np.empty(self.N, dtype=object)
+        self.z_measures = np.empty(self.N, dtype=object)
+
+    def add_noisy_operation_state_prep(self, p, q):
+        noisy_operation_state_prep = (1-p)*Dirac.ket_bra(2,0,0) + p*Dirac.ket_bra(2,1,1)
+        combined_noisy_operation_state_prep = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_state_prep, q, self.N)
+        self.noisy_operations_state_prep.append(combined_noisy_operation_state_prep)
+
+    def add_noisy_operation_coherent_x(self, theta, q):
+        theta_radians = (theta/180)*np.pi
+        noisy_operation_coherent = QubitUnitaryOperation.get_rotate_x(theta_radians)
+        combined_noisy_operation_coherent = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_coherent, q, self.N)
+        self.descriptions.append(f"Coherent noise rot_X {theta} deg")
+        self.operations.append(combined_noisy_operation_coherent)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'N'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def add_noisy_operation_coherent_y(self, theta, q):
+        theta_radians = (theta/180)*np.pi
+        noisy_operation_coherent = QubitUnitaryOperation.get_rotate_y(theta_radians)
+        combined_noisy_operation_coherent = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_coherent, q, self.N)
+        self.descriptions.append(f"Coherent noise rot_Y {theta} deg")
+        self.operations.append(combined_noisy_operation_coherent)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'N'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+    
+    def add_noisy_operation_coherent_z(self, theta, q):
+        theta_radians = (theta/180)*np.pi
+        noisy_operation_coherent = QubitUnitaryOperation.get_rotate_z(theta_radians)
+        combined_noisy_operation_coherent = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_coherent, q, self.N)
+        self.descriptions.append(f"Coherent noise rot_Z {theta} deg")
+        self.operations.append(combined_noisy_operation_coherent)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'N'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def add_noisy_operation_incoherent(self, px, py, pz, q):
+        I = QubitUnitaryOperation.get_identity()
+        X = QubitUnitaryOperation.get_pauli_x()
+        Y = QubitUnitaryOperation.get_pauli_y()
+        Z = QubitUnitaryOperation.get_pauli_z()
+        noisy_operation_incoherent = (1-px-py-pz)*I + px*X + py*Y +pz*Z
+        combined_noisy_operation_incoherent = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_incoherent, q, self.N)
+        self.noisy_operations_incoherent.append(combined_noisy_operation_incoherent)
+
+    def add_noisy_operation_readout(self, epsilon, nu, q):
+        noisy_operation_readout = np.array([[1-epsilon,nu],[epsilon,1-nu]])
+        combined_noisy_operation_readout = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_readout, q, self.N)
+        self.noisy_operations_readout.append(combined_noisy_operation_readout)
+
+    # Override method execute() from class Circuit
+    def execute(self, print_state=False):
+        self.state_vector = StateVector(self.N)
+        for noisy_operation in self.noisy_operations_state_prep:
+            self.state_vector.apply_noisy_operation(noisy_operation)
+        self.quantum_states = [self.state_vector.get_quantum_state()]
+        for q in range(self.N):
+            self.x_measures[q] = []
+            self.y_measures[q] = []
+            self.z_measures[q] = []
+        if print_state:
+            print("Initial quantum state")
+            self.state_vector.print()
+        for operation, description in zip(self.operations, self.descriptions):
+            self.state_vector.apply_unitary_operation(operation)
+            self.quantum_states.append(self.state_vector.get_quantum_state())
+            if "Coherent noise" not in description:
+                for noisy_operation in self.noisy_operations_incoherent:
+                    self.state_vector.apply_noisy_operation(noisy_operation)
+                for q in range(self.N):
+                    self.x_measures[q].append(self.state_vector.measure_x(q))
+                    self.y_measures[q].append(self.state_vector.measure_y(q))
+                    self.z_measures[q].append(self.state_vector.measure_z(q))
+                if print_state:
+                    print(description)
+                    print(operation)
+                    print("Current quantum state")
+                    self.state_vector.print()
+
+    # Override method measure() from class Circuit
+    def measure(self, print_state=False):
+        for noisy_operation in self.noisy_operations_readout:
+            self.state_vector.apply_noisy_operation(noisy_operation)
+        self.state_vector.noisy_measure()
+        if print_state:
+            print("Measured state:")
+            print(self.state_vector.get_classical_state_as_string())
+
+    def get_x_measures(self, q):
+        return self.x_measures[q]
+    
+    def get_y_measures(self, q):
+        return self.y_measures[q]
+    
+    def get_z_measures(self, q):
+        return self.z_measures[q]
+
 
 """
 Circuit creation for quantum Fourier transform (QFT) and inverse quantum Fourier transform (iQFT).
@@ -816,3 +973,26 @@ class QuantumUtil:
         
         plt.title('Intermediate probabilities')
         plt.show()
+
+    """
+    Function to plot x, y, and z-values for each qubit during the last execution of a circuit.
+    """
+    def plot_intermediate_states_per_qubit(circuit:Circuit):
+        for q in range(circuit.N):
+            x_measures = circuit.get_x_measures(q)
+            y_measures = circuit.get_y_measures(q)
+            z_measures = circuit.get_z_measures(q)
+            fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 12))
+            ax1.plot(x_measures)
+            ax1.set_ylim(-1.0, 1.0)
+            ax1.set_title(f'X for qubit {q}')
+            ax1.set_ylabel('X')
+            ax2.plot(y_measures)
+            ax2.set_ylim(-1.0, 1.0)
+            ax2.set_title(f'Y for qubit {q}')
+            ax2.set_ylabel('Y')
+            ax3.plot(z_measures)
+            ax3.set_ylim(-1.0, 1.0)
+            ax3.set_title(f'Z for qubit {q}')
+            ax3.set_xlabel('Circuit depth')
+            ax3.set_ylabel('Z')
