@@ -21,11 +21,21 @@ import matplotlib.pyplot as plt
 import matplotlib
 import math
 import cmath
-import random
+import matplotlib.animation as animation
 from collections import Counter
 from scipy.linalg import expm
 
-# Set the default font family to Courier to ensure a monospaced font for labels of axes in figures
+'''
+This code requires QuTiP for the visualisation of Bloch spheres.
+See: https://qutip.org/
+QuTiP can be installed by
+pip install qutip
+'''
+from qutip import Bloch
+
+'''
+Set the default font family to Courier to ensure a monospaced font for labels of axes in 
+'''
 matplotlib.rcParams['font.family'] = 'Courier'
 
 """
@@ -591,6 +601,14 @@ class Circuit:
             gate_as_list[start:start + len(gate)] = list(gate)
             gate_as_string = ''.join(gate_as_list)
             self.gates.append(gate_as_string)
+
+    def create_noisy_circuit(self):
+        noisy_circuit = NoisyCircuit(self.N)
+        for operation, description, gate in zip(self.operations, self.descriptions, self.gates):
+            noisy_circuit.operations.append(operation)
+            noisy_circuit.descriptions.append(description)
+            noisy_circuit.gates.append(gate)
+        return noisy_circuit
     
     def print_circuit(self):
         for description in self.descriptions:
@@ -629,7 +647,7 @@ Class representing a noisy quantum circuit of N qubits.
 Inherits from Circuit.
 '''
 class NoisyCircuit(Circuit):
-    def __init__(self,N):
+    def __init__(self, N):
         super().__init__(N)
         self.state_vector = StateVector(self.N)
         self.noisy_operations_state_prep = []
@@ -693,6 +711,16 @@ class NoisyCircuit(Circuit):
         noisy_operation_readout = np.array([[1-epsilon,nu],[epsilon,1-nu]])
         combined_noisy_operation_readout = CircuitUnitaryOperation.get_combined_operation_for_qubit(noisy_operation_readout, q, self.N)
         self.noisy_operations_readout.append(combined_noisy_operation_readout)
+
+    def create_ideal_circuit(self):
+        ideal_circuit = NoisyCircuit(self.N)
+        for operation, description, gate in zip(self.operations, self.descriptions, self.gates):
+            if "Coherent noise" not in description:
+                ideal_circuit.operations.append(operation)
+                ideal_circuit.descriptions.append(description)
+                ideal_circuit.gates.append(gate)
+        return ideal_circuit
+
 
     # Override method execute() from class Circuit
     def execute(self, print_state=False):
@@ -976,23 +1004,97 @@ class QuantumUtil:
 
     """
     Function to plot x, y, and z-values for each qubit during the last execution of a circuit.
+    If parameter noisy_circuit is defined, the x, y, and z values for that circuit will be shown in red.
     """
-    def plot_intermediate_states_per_qubit(circuit:Circuit):
-        for q in range(circuit.N):
-            x_measures = circuit.get_x_measures(q)
-            y_measures = circuit.get_y_measures(q)
-            z_measures = circuit.get_z_measures(q)
+    @staticmethod
+    def plot_intermediate_states_per_qubit(ideal_circuit:Circuit, noisy_circuit:Circuit=None):
+        for q in range(ideal_circuit.N):
+            x_measures_ideal = ideal_circuit.get_x_measures(q)
+            y_measures_ideal = ideal_circuit.get_y_measures(q)
+            z_measures_ideal = ideal_circuit.get_z_measures(q)
+           
             fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 12))
-            ax1.plot(x_measures)
+            ax1.plot(x_measures_ideal, 'b', label='x ideal')
             ax1.set_ylim(-1.0, 1.0)
             ax1.set_title(f'X for qubit {q}')
             ax1.set_ylabel('X')
-            ax2.plot(y_measures)
+            ax2.plot(y_measures_ideal, 'b', label='y ideal')
             ax2.set_ylim(-1.0, 1.0)
             ax2.set_title(f'Y for qubit {q}')
             ax2.set_ylabel('Y')
-            ax3.plot(z_measures)
+            ax3.plot(z_measures_ideal, 'b', label='z ideal')
             ax3.set_ylim(-1.0, 1.0)
             ax3.set_title(f'Z for qubit {q}')
             ax3.set_xlabel('Circuit depth')
             ax3.set_ylabel('Z')
+
+            if not noisy_circuit is None:
+                x_measures_noisy = noisy_circuit.get_x_measures(q)
+                y_measures_noisy = noisy_circuit.get_y_measures(q)
+                z_measures_noisy = noisy_circuit.get_z_measures(q)
+                ax1.plot(x_measures_noisy, 'r', label='x noisy')
+                ax2.plot(y_measures_noisy, 'r', label='y noisy')
+                ax3.plot(z_measures_noisy, 'r', label='z noisy')
+                ax1.legend(loc='upper right')
+                ax2.legend(loc='upper right')
+                ax3.legend(loc='upper right')
+
+
+    """
+    Function to create an animation of the execution of a noisy quantum circuit using Bloch spheres.
+    Parameter ideal_circuit should have the same number of qubits and the same gate operations as noisy_circuit, 
+    but without decoherence or quantum noise.
+    """
+    @staticmethod
+    def create_animation(ideal_circuit:NoisyCircuit, noisy_circuit:NoisyCircuit=None):
+
+        # Define the number of frames for the animation
+        num_frames = len(ideal_circuit.get_x_measures(0))
+
+        # Create a figure for the plot
+        fig_width = 3 * ideal_circuit.N
+        fig_height = 4
+        fig = plt.figure()
+        fig.set_size_inches(fig_width, fig_height)
+
+        # Create a Bloch sphere object for each qubit
+        b = []
+        for q in range(ideal_circuit.N):
+            ax = fig.add_subplot(1, ideal_circuit.N, q+1, projection='3d')
+            b.append(Bloch(fig=fig, axes=ax))
+
+        # Function to update the Bloch sphere for each frame
+        def animate(i):
+            for q in range(ideal_circuit.N):
+                # Clear the previous vectors and points
+                b[q].clear()  
+
+                # Define the state vector for the ideal circuit
+                x = ideal_circuit.get_x_measures(q)[i]
+                y = ideal_circuit.get_y_measures(q)[i]
+                z = ideal_circuit.get_z_measures(q)[i]
+                ideal_state_vector = np.array([x, y, z])
+
+                # Add the ideal state to the Bloch sphere
+                b[q].add_vectors(ideal_state_vector)
+
+                # Define the state vector for the noisy circuit
+                if not noisy_circuit is None:
+                    x = noisy_circuit.get_x_measures(q)[i]
+                    y = noisy_circuit.get_y_measures(q)[i]
+                    z = noisy_circuit.get_z_measures(q)[i]
+                    noisy_state_vector = np.array([x, y, z])
+
+                    # Add the noisy state to the Bloch sphere
+                    b[q].add_vectors(noisy_state_vector)
+
+                # Green is ideal state, red is noisy state
+                b[q].vector_color = ['g', 'r']
+
+                # Redraw the Bloch sphere
+                b[q].make_sphere()  
+
+        # Create an animation
+        ani = animation.FuncAnimation(fig, animate, frames=num_frames, repeat=False)
+
+        return ani
