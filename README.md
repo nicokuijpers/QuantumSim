@@ -3,7 +3,8 @@ This is a quantum computer simulator in Python with several Jupyter notebooks to
 
 The main purpose of this simulator is to explain the connection between quantum information theory and its implementation in Python code.
 Intermediate quantum states are visualised to get insight in the effect of quantum operations on the state of a quantum circuit.
-A number of Jupyter notebooks with common quantum algorithms is provided.
+A number of Jupyter notebooks with common quantum algorithms is provided. In addition, the concept of incoherence and quantum noise
+is introduced and visualised with animations using Bloch spheres.
 
 Contents of this repository:
 
@@ -18,6 +19,7 @@ Contents of this repository:
 | [QuantumSimShorAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimShorAlgorithm.ipynb) | Shor's Algorithm |
 | [QuantumSimGroverAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimGroverAlgorithm.ipynb) | Grover's Algorithm |
 | [QuantumSimNoise.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoise.ipynb) | Incoherence and quantum noise |
+| [QuantumSimNoiseBlochSphere.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoiseBlochSphere.ipynb) | Visualisation of (noisy) circuits using Bloch spheres |
 
 Copyright (c) 2024 Nico Kuijpers
 
