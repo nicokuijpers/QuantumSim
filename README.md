@@ -25,6 +25,8 @@ Contents of this repository:
 is an example animation of (inverse) Quantum Fourier Transform (QFT) with Bloch spheres. Green arrows represent the state of an ideal circuit and red arrows the state of a noisy circuit. The circuit is composed of 5 qubits. The qubits are brought into Fourier state $|\tilde{19}\rangle$ and inverse QFT is applied. 
 After measuring, the resulting classical state will the binary represention of $19$ which is $|10011\rangle$.
 
+This code requires QuTiP for the visualisation of Bloch spheres, see https://qutip.org/.
+
 Copyright (c) 2024 Nico Kuijpers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
