@@ -21,22 +21,26 @@ import matplotlib.pyplot as plt
 import matplotlib
 import math
 import cmath
+import matplotlib.colors as mcol
 import matplotlib.animation as animation
 from collections import Counter
 from scipy.linalg import expm
 
+
 '''
-This code requires QuTiP for the visualisation of Bloch spheres.
+This code requires QuTiP for rendering Bloch spheres.
 See: https://qutip.org/
 QuTiP can be installed by
 pip install qutip
 '''
 from qutip import Bloch
 
+
 '''
 Set the default font family to Courier to ensure a monospaced font for labels of axes in 
 '''
 matplotlib.rcParams['font.family'] = 'Courier'
+
 
 """
 Functions for the Dirac notation to describe (quantum) states and (quantum) operators.
@@ -883,7 +887,7 @@ class QuantumUtil:
 
         radius_circle = 0.45
         length_arrow = 0.4
-        color_map = plt.get_cmap('jet')
+        color_map = mcol.LinearSegmentedColormap.from_list('CmapBlueRed',['b','r'])
         norm = plt.Normalize(vmin=0, vmax=1)
 
         for (x, y), c in np.ndenumerate(matrix_of_all_states):
@@ -957,7 +961,7 @@ class QuantumUtil:
         ax.yaxis.set_major_locator(plt.NullLocator())
 
         size = 0.9
-        color_map = plt.get_cmap('jet')
+        color_map = mcol.LinearSegmentedColormap.from_list('CmapBlueRed',['b','r'])
         norm = plt.Normalize(vmin=0, vmax=1)
 
         for (x, y), w in np.ndenumerate(matrix_of_probabilities):
