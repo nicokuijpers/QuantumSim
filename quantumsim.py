@@ -10,7 +10,7 @@ persons to whom the Software is furnished to do so, subject to the following con
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
 Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+THE SOFTWARE IS åPROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
 BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
@@ -24,7 +24,6 @@ import cmath
 import matplotlib.colors as mcol
 import matplotlib.animation as animation
 from collections import Counter
-from scipy.linalg import expm
 
 
 '''
@@ -40,6 +39,11 @@ from qutip import Bloch
 Set the default font family to Courier to ensure a monospaced font for labels of axes in 
 '''
 matplotlib.rcParams['font.family'] = 'Courier'
+
+'''
+Symbol for pi
+'''
+pi_symbol = '\u03c0'
 
 
 """
@@ -119,18 +123,21 @@ class QubitUnitaryOperation:
     
     @staticmethod
     def get_rotate_x(theta):
-        X = QubitUnitaryOperation.get_pauli_x()
-        return expm(-1j * theta / 2 * X)
+        sin = math.sin(theta/2)
+        cos = math.cos(theta/2)
+        return np.array([[cos, -1j * sin],[-1j * sin, cos]], dtype=complex)
     
     @staticmethod
     def get_rotate_y(theta):
-        Y = QubitUnitaryOperation.get_pauli_y()
-        return expm(-1j * theta / 2 * Y)
+        sin = math.sin(theta/2)
+        cos = math.cos(theta/2)
+        return np.array([[cos, -sin], [sin, cos]], dtype=complex)
+
     
     @staticmethod
     def get_rotate_z(theta):
-        Z = QubitUnitaryOperation.get_pauli_z()
-        return expm(-1j * theta / 2 * Z)
+        a = 0.5j * theta
+        return np.array([[cmath.exp(-a), 0], [0, cmath.exp(a)]], dtype=complex)
 
 
 """
@@ -197,6 +204,21 @@ class CircuitUnitaryOperation:
                 combined_operation_one  = np.kron(combined_operation_one, identity)
             
         return combined_operation_zero + combined_operation_one
+    
+    @staticmethod
+    def get_combined_operation_for_controlled_rotate_x(theta, control, target, N):
+        operation = QubitUnitaryOperation.get_rotate_x(theta)
+        return CircuitUnitaryOperation.get_combined_operation_for_controlled_qubit_operation(operation, control, target, N)
+
+    @staticmethod
+    def get_combined_operation_for_controlled_rotate_y(theta, control, target, N):
+        operation = QubitUnitaryOperation.get_rotate_y(theta)
+        return CircuitUnitaryOperation.get_combined_operation_for_controlled_qubit_operation(operation, control, target, N)
+
+    @staticmethod
+    def get_combined_operation_for_controlled_rotate_z(theta, control, target, N):
+        operation = QubitUnitaryOperation.get_rotate_z(theta)
+        return CircuitUnitaryOperation.get_combined_operation_for_controlled_qubit_operation(operation, control, target, N)
     
     @staticmethod
     def get_combined_operation_for_cnot(control, target, N):
@@ -433,7 +455,6 @@ class Circuit:
 
     def phase(self, theta, q):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_phase(theta, q, self.N)
-        pi_symbol = '\u03c0'
         self.descriptions.append(f"Phase with theta = {theta/np.pi:.3f} {pi_symbol} on qubit {q}")
         self.operations.append(combined_operation)
         gate_as_string = '.'*self.N
@@ -488,13 +509,56 @@ class Circuit:
 
     def controlled_phase(self, theta, control, target):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_phase(theta, control, target, self.N)
-        pi_symbol = '\u03c0'
         self.descriptions.append(f"Controlled phase with theta = {theta/np.pi:.3f} {pi_symbol}, control qubit {control}, and target qubit {target}")
         self.operations.append(combined_operation)
         gate_as_string = '.'*self.N
         gate_as_list = list(gate_as_string)
         gate_as_list[control] = '*'
         gate_as_list[target] = 'S'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def controlled_rotate_x(self, theta, control, target):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_rotate_x(theta, control, target, self.N)
+        self.descriptions.append(f"Controlled rotate X with theta = {theta/np.pi:.3f} {pi_symbol}, control qubit {control}, and target qubit {target}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[control] = '*'
+        gate_as_list[target] = 'R'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def controlled_rotate_y(self, theta, control, target):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_rotate_y(theta, control, target, self.N)
+        self.descriptions.append(f"Controlled rotate Y with theta = {theta/np.pi:.3f} {pi_symbol}, control qubit {control}, and target qubit {target}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[control] = '*'
+        gate_as_list[target] = 'R'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def controlled_rotate_z(self, theta, control, target):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_rotate_z(theta, control, target, self.N)
+        self.descriptions.append(f"Controlled rotate Z with theta = {theta/np.pi:.3f} {pi_symbol}, control qubit {control}, and target qubit {target}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[control] = '*'
+        gate_as_list[target] = 'R'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def controlled_unitary_operation(self, operation, control, target):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation_general(operation, control, target, self.N)
+        self.descriptions.append(f"Controlled unitary operation with control qubit {control} and target qubit {target}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[control] = '*'
+        gate_as_list[target] = 'U'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
@@ -725,7 +789,6 @@ class NoisyCircuit(Circuit):
                 ideal_circuit.gates.append(gate)
         return ideal_circuit
 
-
     # Override method execute() from class Circuit
     def execute(self, print_state=False):
         self.state_vector = StateVector(self.N)
@@ -733,9 +796,9 @@ class NoisyCircuit(Circuit):
             self.state_vector.apply_noisy_operation(noisy_operation)
         self.quantum_states = [self.state_vector.get_quantum_state()]
         for q in range(self.N):
-            self.x_measures[q] = []
-            self.y_measures[q] = []
-            self.z_measures[q] = []
+            self.x_measures[q] = [self.state_vector.measure_x(q)]
+            self.y_measures[q] = [self.state_vector.measure_y(q)]
+            self.z_measures[q] = [self.state_vector.measure_z(q)]
         if print_state:
             print("Initial quantum state")
             self.state_vector.print()
