@@ -186,6 +186,22 @@ class CircuitUnitaryOperation:
         return CircuitUnitaryOperation.get_combined_operation_for_qubit(phase, q, N)
     
     @staticmethod
+    def get_combined_operation_for_rotate_x(theta, q, N):
+        rotate = QubitUnitaryOperation.get_rotate_x(theta)
+        return CircuitUnitaryOperation.get_combined_operation_for_qubit(rotate, q, N)
+    
+    @staticmethod
+    def get_combined_operation_for_rotate_y(theta, q, N):
+        rotate = QubitUnitaryOperation.get_rotate_y(theta)
+        return CircuitUnitaryOperation.get_combined_operation_for_qubit(rotate, q, N)
+    
+    @staticmethod
+    def get_combined_operation_for_rotate_z(theta, q, N):
+        rotate = QubitUnitaryOperation.get_rotate_z(theta)
+        return CircuitUnitaryOperation.get_combined_operation_for_qubit(rotate, q, N)
+    
+    
+    @staticmethod
     def get_combined_operation_for_controlled_qubit_operation(operation, control, target, N):
         identity = QubitUnitaryOperation.get_identity()
         ket_bra_00 = Dirac.ket_bra(2,0,0)
@@ -460,6 +476,36 @@ class Circuit:
         gate_as_string = '.'*self.N
         gate_as_list = list(gate_as_string)
         gate_as_list[q] = 'S'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def rotate_x(self, theta, q):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_rotate_x(theta, q, self.N)
+        self.descriptions.append(f"Rotate X with theta = {theta/np.pi:.3f} {pi_symbol} on qubit {q}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'R'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+    
+    def rotate_y(self, theta, q):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_rotate_y(theta, q, self.N)
+        self.descriptions.append(f"Rotate Y with theta = {theta/np.pi:.3f} {pi_symbol} on qubit {q}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'R'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+    
+    def rotate_z(self, theta, q):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_rotate_z(theta, q, self.N)
+        self.descriptions.append(f"Rotate Z with theta = {theta/np.pi:.3f} {pi_symbol} on qubit {q}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'R'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
