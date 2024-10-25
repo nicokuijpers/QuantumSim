@@ -133,7 +133,6 @@ class QubitUnitaryOperation:
         cos = math.cos(theta/2)
         return np.array([[cos, -sin], [sin, cos]], dtype=complex)
 
-    
     @staticmethod
     def get_rotate_z(theta):
         a = 0.5j * theta
@@ -337,7 +336,6 @@ class CircuitUnitaryOperation:
                 i = i + 1
         return combined_operation_zero + combined_operation_one
     
-
     @staticmethod
     def get_combined_operation_for_multi_controlled_pauli_z_operation(N):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_identity(N)
