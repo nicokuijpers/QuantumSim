@@ -287,7 +287,7 @@ class CircuitUnitaryOperation:
     @staticmethod
     def get_combined_operation_for_toffoli(control_a, control_b, target, N):
         if control_a == control_b or control_a == target or control_b == target:
-            raise ValueError(f'Toffoli gate not supported for control_a = {control_a}, control_b = {control_b}, and target = {target}')
+            raise ValueError(f'Toffoli operation not supported for control_a = {control_a}, control_b = {control_b}, and target = {target}')
         if control_b != 0 and target != 0:
             combined_operation_swap_control_a_0 = CircuitUnitaryOperation.get_combined_operation_for_swap(control_a, 0, N)
             combined_operation_cnot_control_b_target = CircuitUnitaryOperation.get_combined_operation_for_cnot(control_b-1, target-1, N-1)
