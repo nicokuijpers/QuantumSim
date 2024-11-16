@@ -268,17 +268,37 @@ class CircuitUnitaryOperation:
     
     @staticmethod
     def get_combined_operation_for_fredkin(control, a, b, N):
-        combined_operation_swap_control_0 = CircuitUnitaryOperation.get_combined_operation_for_swap(control, 0, N)
-        combined_operation_swap_a_b = CircuitUnitaryOperation.get_combined_operation_for_swap(a-1, b-1, N-1)
-        combined_operation_fredkin = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation(combined_operation_swap_a_b)
-        return np.dot(np.dot(combined_operation_swap_control_0, combined_operation_fredkin), combined_operation_swap_control_0)
+        if control == a or control == b:
+            raise ValueError(f'Fredkin operation not supported for control = {control}, a = {a}, and b = {b}')
+        if a != 0 and b != 0:
+            combined_operation_swap_control_0 = CircuitUnitaryOperation.get_combined_operation_for_swap(control, 0, N)
+            combined_operation_swap_a_b = CircuitUnitaryOperation.get_combined_operation_for_swap(a-1, b-1, N-1)
+            combined_operation_fredkin = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation(combined_operation_swap_a_b)
+            return np.dot(np.dot(combined_operation_swap_control_0, combined_operation_fredkin), combined_operation_swap_control_0)
+        elif a == 0:
+            combined_operation_swap_control_a = CircuitUnitaryOperation.get_combined_operation_for_swap(control, a, N)
+            combined_operation_fredkin = CircuitUnitaryOperation.get_combined_operation_for_fredkin(a, control, b, N)
+            return np.dot(np.dot(combined_operation_swap_control_a, combined_operation_fredkin), combined_operation_swap_control_a)
+        else:
+            combined_operation_swap_control_b = CircuitUnitaryOperation.get_combined_operation_for_swap(control, b, N)
+            combined_operation_fredkin = CircuitUnitaryOperation.get_combined_operation_for_fredkin(b, a, control, N)
+            return np.dot(np.dot(combined_operation_swap_control_b, combined_operation_fredkin), combined_operation_swap_control_b)
     
     @staticmethod
-    def get_combined_operation_for_toffoli(control, a, b, N):
-        combined_operation_swap_control_0 = CircuitUnitaryOperation.get_combined_operation_for_swap(control, 0, N)
-        combined_operation_cnot_a_b = CircuitUnitaryOperation.get_combined_operation_for_cnot(a-1, b-1, N-1)
-        combined_operation_toffoli = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation(combined_operation_cnot_a_b)
-        return np.dot(np.dot(combined_operation_swap_control_0, combined_operation_toffoli), combined_operation_swap_control_0)
+    def get_combined_operation_for_toffoli(control_a, control_b, target, N):
+        if control_a == control_b or control_a == target or control_b == target:
+            raise ValueError(f'Toffoli gate not supported for control_a = {control_a}, control_b = {control_b}, and target = {target}')
+        if control_b != 0 and target != 0:
+            combined_operation_swap_control_a_0 = CircuitUnitaryOperation.get_combined_operation_for_swap(control_a, 0, N)
+            combined_operation_cnot_control_b_target = CircuitUnitaryOperation.get_combined_operation_for_cnot(control_b-1, target-1, N-1)
+            combined_operation_toffoli = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation(combined_operation_cnot_control_b_target)
+            return np.dot(np.dot(combined_operation_swap_control_a_0, combined_operation_toffoli), combined_operation_swap_control_a_0)
+        elif control_b == 0:
+            return CircuitUnitaryOperation.get_combined_operation_for_toffoli(control_b, control_a, target, N)
+        else:
+            combined_operation_swap_control_a_target = CircuitUnitaryOperation.get_combined_operation_for_swap(control_a, target, N)
+            combined_operation_toffoli = CircuitUnitaryOperation.get_combined_operation_for_toffoli(target, control_b, control_a, N)
+            return np.dot(np.dot(combined_operation_swap_control_a_target, combined_operation_toffoli), combined_operation_swap_control_a_target)
     
     @staticmethod
     def get_combined_operation_for_unitary_operation_general(operation, target, N):
