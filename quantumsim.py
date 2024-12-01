@@ -137,6 +137,16 @@ class QubitUnitaryOperation:
     def get_rotate_z(theta):
         a = 0.5j * theta
         return np.array([[cmath.exp(-a), 0], [0, cmath.exp(a)]], dtype=complex)
+    
+    @staticmethod
+    def get_u_gate(theta, phi, lam):
+        sin = math.sin(theta/2)
+        cos = math.cos(theta/2)
+        a = cos
+        b = -cmath.exp(1j * lam) * sin
+        c = cmath.exp(1j * phi) * sin
+        d = cmath.exp(1j * (phi + lam)) * cos
+        return np.array([[a, b], [c, d]])
 
 
 """
@@ -199,6 +209,10 @@ class CircuitUnitaryOperation:
         rotate = QubitUnitaryOperation.get_rotate_z(theta)
         return CircuitUnitaryOperation.get_combined_operation_for_qubit(rotate, q, N)
     
+    @staticmethod
+    def get_combined_operation_for_u_gate(theta, phi, lam, q, N):
+        u_gate = QubitUnitaryOperation.get_u_gate(theta, phi, lam)
+        return CircuitUnitaryOperation.get_combined_operation_for_qubit(u_gate, q, N)
     
     @staticmethod
     def get_combined_operation_for_controlled_qubit_operation(operation, control, target, N):
@@ -259,6 +273,11 @@ class CircuitUnitaryOperation:
     def get_combined_operation_for_controlled_phase(theta, control, target, N):
         phase_theta = QubitUnitaryOperation.get_phase(theta)
         return CircuitUnitaryOperation.get_combined_operation_for_controlled_qubit_operation(phase_theta, control, target, N)
+    
+    @staticmethod
+    def get_combined_operation_for_controlled_u_gate(theta, phi, lam, control, target, N):
+        u_gate = QubitUnitaryOperation.get_u_gate(theta, phi, lam)
+        return CircuitUnitaryOperation.get_combined_operation_for_controlled_qubit_operation(u_gate, control, target, N)
     
     @staticmethod
     def get_combined_operation_for_swap(a, b, N):
@@ -527,6 +546,16 @@ class Circuit:
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
+    def u_gate(self, theta, phi, lam, q):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_u_gate(theta, phi, lam, q, self.N)
+        self.descriptions.append(f"U-gate with (theta,phi,lam) = ({theta/np.pi:.3f} {pi_symbol}, {phi/np.pi:.3f} {pi_symbol}, {lam/np.pi:.3f} {pi_symbol}) on qubit {q}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'U'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
     def cnot(self, control, target):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_cnot(control, target, self.N)
         self.descriptions.append(f"CNOT with control qubit {control} and target qubit {target}")
@@ -612,6 +641,17 @@ class Circuit:
         gate_as_list = list(gate_as_string)
         gate_as_list[control] = '*'
         gate_as_list[target] = 'R'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def controlled_u_gate(self, theta, phi, lam, control, target):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_u_gate(theta, phi, lam, control, target, self.N)
+        self.descriptions.append(f"Controlled U-gate (theta,phi,lam) = ({theta/np.pi:.3f} {pi_symbol}, {phi/np.pi:.3f} {pi_symbol}, {lam/np.pi:.3f} {pi_symbol}), control {control}, and target {target}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[control] = '*'
+        gate_as_list[target] = 'U'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
