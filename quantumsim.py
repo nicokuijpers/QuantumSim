@@ -425,6 +425,27 @@ class StateVector:
         # Compute the real part of <psi|Z|psi>
         Z = CircuitUnitaryOperation.get_combined_operation_for_pauli_z(q, self.N)
         return np.vdot(self.state_vector, Z.dot(self.state_vector)).real
+    
+    def measure_qubit(self, q):
+        identity = QubitUnitaryOperation.get_identity()
+        ket_bra_00 = Dirac.ket_bra(2,0,0)
+        ket_bra_11 = Dirac.ket_bra(2,1,1)
+        P0 = np.eye(1,1)
+        P1 = np.eye(1,1)
+        for i in range(self.N):
+            if i == q:
+                P0 = np.kron(P0, ket_bra_00)
+                P1 = np.kron(P1, ket_bra_11)
+            else:
+                P0 = np.kron(P0, identity)
+                P1 = np.kron(P1, identity)
+        prob_0 = np.vdot(self.state_vector, P0.dot(self.state_vector)).real
+        prob_1 = np.vdot(self.state_vector, P1.dot(self.state_vector)).real
+        r = np.random.random()
+        if r <= prob_0:
+            self.state_vector = np.dot(P0,self.state_vector)/np.sqrt(prob_0)
+        else:
+            self.state_vector = np.dot(P1,self.state_vector)/np.sqrt(prob_1)
 
     def measure(self):
         probalities = np.square(np.abs(self.state_vector)).flatten()
@@ -719,6 +740,18 @@ class Circuit:
         self.gates.append(gate_as_string)
 
     """
+    Measure a single qubit and change state vector accordingly
+    """
+    def measure_qubit(self, q):
+        self.descriptions.append(f"Measure qubit {q}")
+        self.operations.append(np.eye(2**self.N))
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'M'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    """
     Swap the registers such that the most significant qubit becomes the least significant qubit and vice versa.
     """
     def swap_registers(self):
@@ -797,7 +830,11 @@ class Circuit:
             print("Initial quantum state")
             self.state_vector.print()
         for operation, description in zip(self.operations, self.descriptions):
-            self.state_vector.apply_unitary_operation(operation)
+            if "Measure qubit" not in description:
+                self.state_vector.apply_unitary_operation(operation)
+            else:
+                q = int(description[14:])
+                self.state_vector.measure_qubit(q)
             self.quantum_states.append(self.state_vector.get_quantum_state())
             if print_state:
                 print(description)
