@@ -16,6 +16,8 @@ Contents of this repository:
 | [QuantumSimMoreOperations.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimMoreOperations.ipynb) | More quantum operations with examples |
 | [QuantumSimBellStates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBellStates.ipynb) | Implementation of the four Bell states |
 | [QuantumSimUGate.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimUGate.ipynb) | U-gate with examples |
+| [QuantumSimQubitMeasurement.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQubitMeasurement.ipynb) | Measuring a single qubit |
+| [QuantumSimTeleportation.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimTeleportation.ipynb) | Quantum teleportation |
 | [QuantumSimFourierTransform.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimFourierTransform.ipynb) | Quantum Fourier Transform (QFT) and inverse QFT |
 | [QuantumSimShorAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimShorAlgorithm.ipynb) | Shor's Algorithm |
 | [QuantumSimGroverAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimGroverAlgorithm.ipynb) | Grover's Algorithm |
