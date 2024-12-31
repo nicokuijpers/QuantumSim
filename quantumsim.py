@@ -150,7 +150,7 @@ class QubitUnitaryOperation:
 
 
 """
-Functions to obtain N x N unitary matrices for unitary operations on quantum circuits of N qubits.
+Functions to obtain 2^N x 2^N unitary matrices for unitary operations on quantum circuits of N qubits.
 """
 class CircuitUnitaryOperation:
     
@@ -167,7 +167,7 @@ class CircuitUnitaryOperation:
 
     @staticmethod
     def get_combined_operation_for_identity(N):
-        return np.array(np.eye(2**N),dtype=complex)
+        return np.array(np.eye(2**N), dtype=complex)
     
     @staticmethod
     def get_combined_operation_for_pauli_x(q, N):
@@ -389,6 +389,31 @@ class CircuitUnitaryOperation:
         combined_operation[2**N-1,2**N-2] = 1 - combined_operation[2**N-1,2**N-2]
         combined_operation[2**N-1,2**N-1] = 1 - combined_operation[2**N-1,2**N-1]
         return combined_operation
+    
+    @staticmethod
+    def get_combined_operation_for_generic_toffoli(controls:list[int], target:int, N:int):
+        nr_controls = len(controls)
+        if target in controls or nr_controls >= N:
+            raise ValueError(f'Generic toffoli gate not supported for controls {controls} and target = {target}')
+        if nr_controls not in controls:
+            combined_operation_swap = np.eye(2**N)
+            controls_sorted = sorted(controls)
+            for i in range(nr_controls):
+                q = controls_sorted[i]
+                combined_operation_swap_q_i = CircuitUnitaryOperation.get_combined_operation_for_swap(q, i, N)
+                combined_operation_swap = np.dot(combined_operation_swap, combined_operation_swap_q_i)
+            combined_operation_swap_target_nr_controls = CircuitUnitaryOperation.get_combined_operation_for_swap(target, nr_controls, N)
+            combined_operation_swap = np.dot(combined_operation_swap, combined_operation_swap_target_nr_controls)
+            combined_operation_toffoli = CircuitUnitaryOperation.get_combined_operation_for_multi_controlled_pauli_x_operation(nr_controls + 1)
+            combined_operation_toffoli_circuit = CircuitUnitaryOperation.get_combined_operation_for_unitary_operation_general(combined_operation_toffoli, 0, N)
+            return np.dot(np.dot(combined_operation_swap, combined_operation_toffoli_circuit), np.conjugate(combined_operation_swap).T)
+        else:
+            combined_operation_swap_control_target = CircuitUnitaryOperation.get_combined_operation_for_swap(nr_controls, target, N)
+            controls_updated = [q for q in controls if q != nr_controls]
+            controls_updated.append(target)
+            combined_operation_generic_toffoli = CircuitUnitaryOperation.get_combined_operation_for_generic_toffoli(controls_updated, nr_controls, N)
+            return np.dot(np.dot(combined_operation_swap_control_target, combined_operation_generic_toffoli), np.conjugate(combined_operation_swap_control_target).T)
+
     
 """
 Class representing the quantum state of a quantum circuit of N qubits.
@@ -736,6 +761,18 @@ class Circuit:
         gate_as_string = '*'*self.N
         gate_as_list = list(gate_as_string)
         gate_as_list[self.N-1] = 'X'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    def generic_toffoli(self, controls:list[int], target:int):
+        combined_operation = CircuitUnitaryOperation.get_combined_operation_for_generic_toffoli(controls, target, self.N)
+        self.descriptions.append(f"Generic Toffoli with controls {controls} and target {target}")
+        self.operations.append(combined_operation)
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        for c in controls:
+            gate_as_list[c] = '*'
+        gate_as_list[target] = 'X'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
