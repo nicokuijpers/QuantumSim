@@ -23,6 +23,8 @@ Contents of this repository:
 | [QuantumSimShorAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimShorAlgorithm.ipynb) | Shor's Algorithm |
 | [QuantumSimGroverAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimGroverAlgorithm.ipynb) | Grover's Algorithm |
 | [QuantumSimDeutschJozsa.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimDeutschJozsa.ipynb) | Deutsch-Jozsa Algorithm |
+| [QuantumSimCounter.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimCounter.ipynb) | Counter circuit to count ones in binary strings |
+| [QuantumSimCounterGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimCounterGrover.ipynb) | Generating binary strings using Counter and Grover |
 | [QuantumSimNoise.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoise.ipynb) | Incoherence and quantum noise |
 | [QuantumSimNoiseBlochSphere.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoiseBlochSphere.ipynb) | Visualisation of (noisy) circuits using Bloch spheres |
 | [QuantumSimDecomposeMultiControlledXandZ.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimDecomposeMultiControlledXandZ.ipynb) | Decomposition of multi-qubit controlled X and Z gates |
