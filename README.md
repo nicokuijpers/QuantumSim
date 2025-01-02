@@ -17,6 +17,7 @@ Contents of this repository:
 | [QuantumSimBellStates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBellStates.ipynb) | Implementation of the four Bell states |
 | [QuantumSimUGate.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimUGate.ipynb) | U-gate with examples |
 | [QuantumSimQubitMeasurement.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQubitMeasurement.ipynb) | Measuring a single qubit |
+| [QuantumSimQubitReset.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQubitReset.ipynb) | Resetting a single qubit |
 | [QuantumSimTeleportation.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimTeleportation.ipynb) | Quantum teleportation |
 | [QuantumSimFourierTransform.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimFourierTransform.ipynb) | Quantum Fourier Transform (QFT) and inverse QFT |
 | [QuantumSimPhaseEstimation.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimPhaseEstimation.ipynb) | Quantum Phase Estimation (QPE) |
