@@ -450,8 +450,8 @@ class StateVector:
         # Compute the real part of <psi|Z|psi>
         Z = CircuitUnitaryOperation.get_combined_operation_for_pauli_z(q, self.N)
         return np.vdot(self.state_vector, Z.dot(self.state_vector)).real
-    
-    def measure_qubit(self, q):
+
+    def measure_qubit(self, q) -> int:
         identity = QubitUnitaryOperation.get_identity()
         ket_bra_00 = Dirac.ket_bra(2,0,0)
         ket_bra_11 = Dirac.ket_bra(2,1,1)
@@ -469,8 +469,16 @@ class StateVector:
         r = np.random.random()
         if r <= prob_0:
             self.state_vector = np.dot(P0,self.state_vector)/np.sqrt(prob_0)
+            return 0
         else:
             self.state_vector = np.dot(P1,self.state_vector)/np.sqrt(prob_1)
+            return 1
+
+    def reset_qubit(self, q):
+        measured_value = self.measure_qubit(q)
+        if measured_value == 1:
+            combined_operation_pauli_x = CircuitUnitaryOperation.get_combined_operation_for_pauli_x(q, self.N)
+            self.apply_unitary_operation(combined_operation_pauli_x)
 
     def measure(self):
         probalities = np.square(np.abs(self.state_vector)).flatten()
@@ -776,15 +784,27 @@ class Circuit:
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
-    """
+    '''
     Measure a single qubit and change state vector accordingly
-    """
+    '''
     def measure_qubit(self, q):
         self.descriptions.append(f"Measure qubit {q}")
         self.operations.append(np.eye(2**self.N))
         gate_as_string = '.'*self.N
         gate_as_list = list(gate_as_string)
         gate_as_list[q] = 'M'
+        gate_as_string = ''.join(gate_as_list)
+        self.gates.append(gate_as_string)
+
+    '''
+    Reset a single qubit and change state vector accordingly
+    '''
+    def reset_qubit(self, q):
+        self.descriptions.append(f"Reset qubit {q}")
+        self.operations.append(np.eye(2**self.N))
+        gate_as_string = '.'*self.N
+        gate_as_list = list(gate_as_string)
+        gate_as_list[q] = 'R'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
 
@@ -867,11 +887,15 @@ class Circuit:
             print("Initial quantum state")
             self.state_vector.print()
         for operation, description in zip(self.operations, self.descriptions):
-            if "Measure qubit" not in description:
+            if "Measure qubit" not in description and "Reset qubit" not in description:
                 self.state_vector.apply_unitary_operation(operation)
             else:
-                q = int(description[14:])
-                self.state_vector.measure_qubit(q)
+                if "Measure qubit" in description:
+                    q = int(description[14:])
+                    self.state_vector.measure_qubit(q)
+                else:
+                    q = int(description[12:])
+                    self.state_vector.reset_qubit(q)
             self.quantum_states.append(self.state_vector.get_quantum_state())
             if print_state:
                 print(description)
