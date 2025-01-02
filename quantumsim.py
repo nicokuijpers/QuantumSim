@@ -743,7 +743,7 @@ class Circuit:
         gate_as_list = list(gate_as_string)
         gate_as_list[control_a] = '*'
         gate_as_list[control_b] = '*'
-        gate_as_list[target] = 'x'
+        gate_as_list[target] = 'X'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
     
