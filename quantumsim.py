@@ -1122,7 +1122,7 @@ class QuantumUtil:
         unique_strings = sorted(list(histogram.keys()))
         counts = [histogram[string] for string in unique_strings]
         plt.bar(unique_strings, counts)
-        if len(histogram) > 8:
+        if len(histogram) > 8 or len(unique_strings[0]) > 8:
             plt.xticks(rotation='vertical')
         plt.xlabel('Classical states')
         plt.ylabel('Nr occurrences')
