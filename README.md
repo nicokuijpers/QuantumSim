@@ -27,6 +27,8 @@ Contents of this repository:
 | [QuantumSimBernsteinVazirani.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBernsteinVazirani.ipynb) | Bernstein-Vazirani Algorithm |
 | [QuantumSimCounter.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimCounter.ipynb) | Counter circuit to count ones in binary strings |
 | [QuantumSimCounterGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimCounterGroverSearch.ipynb) | Generating binary strings using Counter and Grover |
+| [QuantumSimThreeQubitAdder.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdder.ipynb) | 3-Qubit adder circuit to compute the sum of two $3$-bit numbers |
+| [QuantumSimThreeQubitAdderGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdderGrover.ipynb) | Finding $a$ and $b$ in $a+b=S$ using 3-qubit adder and Grover |
 | [QuantumSimSudokuSolver.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimSudokuSolver.ipynb) | 2 x 2 Sudoku solver using Grover's search algorithm |
 | [QuantumSimNoise.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoise.ipynb) | Incoherence and quantum noise |
 | [QuantumSimNoiseBlochSphere.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoiseBlochSphere.ipynb) | Visualisation of (noisy) circuits using Bloch spheres |
