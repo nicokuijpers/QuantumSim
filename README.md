@@ -30,9 +30,11 @@ Contents of this repository:
 | [QuantumSimThreeQubitAdder.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdder.ipynb) | 3-Qubit adder circuit to compute the sum of two $3$-bit numbers |
 | [QuantumSimThreeQubitAdderGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdderGrover.ipynb) | Finding $a$ and $b$ in $a+b=S$ using 3-qubit adder and Grover |
 | [QuantumSimSudokuSolver.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimSudokuSolver.ipynb) | 2 x 2 Sudoku solver using Grover's search algorithm |
+| [QuantumSimDecomposeMultiControlledXandZ.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimDecomposeMultiControlledXandZ.ipynb) | Decomposition of multi-qubit controlled X and Z gates |
 | [QuantumSimNoise.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoise.ipynb) | Incoherence and quantum noise |
 | [QuantumSimNoiseBlochSphere.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoiseBlochSphere.ipynb) | Visualisation of (noisy) circuits using Bloch spheres |
-| [QuantumSimDecomposeMultiControlledXandZ.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimDecomposeMultiControlledXandZ.ipynb) | Decomposition of multi-qubit controlled X and Z gates |
+| [QuantumSimNoisyGates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoisyGates.ipynb) | Simulation of noisy quantum gates |
+
 
 [bloch_sphere_animation_fourier.mp4](https://github.com/nicokuijpers/QuantumSim/blob/main/assets/videos/bloch_sphere_animation_fourier.mp4)
 is an example animation of (inverse) Quantum Fourier Transform (QFT) with Bloch spheres. Green arrows represent the state of an ideal circuit and red arrows the state of a noisy circuit. The circuit is composed of 5 qubits. The qubits are brought into Fourier state $|\tilde{19}\rangle$ and inverse QFT is applied. 
