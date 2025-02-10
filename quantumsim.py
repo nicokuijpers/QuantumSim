@@ -24,6 +24,7 @@ import cmath
 import matplotlib.colors as mcol
 import matplotlib.animation as animation
 import random
+import re
 from abc import ABC, abstractmethod
 from collections import Counter
 
@@ -388,6 +389,7 @@ class CircuitUnitaryOperation:
         combined_operation[2**N-1,2**N-2] = 1 - combined_operation[2**N-1,2**N-2]
         combined_operation[2**N-1,2**N-1] = 1 - combined_operation[2**N-1,2**N-1]
         return combined_operation
+    
     @staticmethod
     def get_combined_operation_for_generic_toffoli(controls:list[int], target:int, N:int):
         nr_controls = len(controls)
@@ -853,7 +855,7 @@ class Circuit:
         gate_as_list[q] = 'U'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
-        # TODO self.instructions.append(U-gate)
+        self.instructions.append(U_Gate(self.N, q, theta, phi, lam)) if self.save_instructions else self.operations.append(combined_operation)
 
     def cnot(self, control, target):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_cnot(control, target, self.N)
@@ -997,7 +999,7 @@ class Circuit:
         gate_as_list[target] = 'U'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
-        # TODO self.instructions.append(Controlled_U_Gate ...)
+        self.instructions.append(Controlled_U_Gate(theta, phi, lam, self.N, target, control))  if self.save_instructions else self.operations.append(combined_operation)
 
     def controlled_unitary_operation(self, operation, control, target):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_controlled_unitary_operation_general(operation, control, target, self.N)
@@ -1021,7 +1023,6 @@ class Circuit:
         self.gates.append(gate_as_string)
         self.instructions.append(Swap(self.N, a, b)) if self.save_instructions else self.operations.append(combined_operation)
 
-        
     def fredkin(self, control, a, b):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_fredkin(control, a, b, self.N)
         self.descriptions.append(f"Fredkin with control qubit {control} and SWAP on qubit {a} and qubit {b}")
@@ -1033,7 +1034,6 @@ class Circuit:
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
         self.instructions.append(Fredkin(self.N, control, a, b))  if self.save_instructions else self.operations.append(combined_operation)
-
     
     def toffoli(self, control_a, control_b, target):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_toffoli(control_a, control_b, target, self.N)
@@ -1053,7 +1053,6 @@ class Circuit:
         gate_as_string = '*'*self.N
         self.gates.append(gate_as_string)
         self.instructions.append(Multi_Controlled_Pauli_Z(self.N))  if self.save_instructions else self.operations.append(combined_operation)
-
 
     def multi_controlled_pauli_x(self):
         combined_operation = CircuitUnitaryOperation.get_combined_operation_for_multi_controlled_pauli_x_operation(self.N)
@@ -1075,30 +1074,28 @@ class Circuit:
         gate_as_list[target] = 'X'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
-        # TODO self.instructions.append(Generid_Toffoli ...)
+        self.instructions.append(Generic_Toffoli(self.N, controls, target))   if self.save_instructions else self.operations.append(combined_operation)
 
     """
     Measurement of a single qubit
     """
     def measurement(self, measurementQubit: int, copyClassicBit: int) -> int:
         self.descriptions.append(f"Measurement on Qubit {measurementQubit} projected on bit: {copyClassicBit}")
-        self.instructions.append(Measurement(measurementQubit, copyClassicBit))
-
         gate_as_string = '.'*self.N
         gate_as_list = list(gate_as_string)
         gate_as_list[measurementQubit] = 'M'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
+        self.instructions.append(Measurement(measurementQubit, copyClassicBit)) if self.save_instructions else self.operations.append(np.eye(2**self.N))
 
     def reset(self, targetQubit: int, readBit: int) -> int:
         self.descriptions.append(f"Reset on Qubit {targetQubit} read from bit: {readBit}")
-        self.instructions.append(Reset(targetQubit, readBit))
-
         gate_as_string = '.'*self.N
         gate_as_list = list(gate_as_string)
         gate_as_list[targetQubit] = 'R'
         gate_as_string = ''.join(gate_as_list)
         self.gates.append(gate_as_string)
+        self.instructions.append(Reset(targetQubit, readBit)) if self.save_instructions else self.operations.append(np.eye(2**self.N))
 
     def noisy_reset(self, q: int, readBit: int, p: float = None, T1: float = None, T2: float = None):
         """Adds a noisy reset gate to the circuit
@@ -1390,12 +1387,14 @@ class Circuit:
         # Char: '|' should be ignored, therefore '+1'
         qubitValue = int(measurement[measureQubit + 1])
         self.classicalBitRegister.write(dataBit, qubitValue)
+        self.quantum_states.append(self.state_vector.get_quantum_state())
     
         return qubitValue
     
     def __reset_execute__(self, targetQubit: int, readBit: int):
         if(self.classicalBitRegister.read(readBit) == 1):
             self.state_vector.apply_unitary_operation(CircuitUnitaryOperation.get_combined_operation_for_pauli_x(targetQubit, self.N))
+        self.quantum_states.append(self.state_vector.get_quantum_state())
 
     def __noisy_reset_execute__(self, targetQubit: int, readBit: int):
         if(self.classicalBitRegister.read(readBit) == 1):
@@ -1442,7 +1441,17 @@ class Circuit:
                     self.__direct_execute__(instruction.getOperation()) 
         else:
             for operation, description in zip(self.operations, self.descriptions):
-                self.state_vector.apply_unitary_operation(operation)
+                if "Measurement" not in description and "Reset" not in description:
+                    self.state_vector.apply_unitary_operation(operation)
+                else:
+                    string = re.search(r"\d+", description)
+                    q = int(string.group())
+                    if "Measurement" in description:
+                        value = self.state_vector.measure_qubit(q)
+                        self.classicalBitRegister.write(q, value)
+                    else:
+                        self.state_vector.reset_qubit(q)
+                        self.classicalBitRegister.write(q, 0)
                 self.quantum_states.append(self.state_vector.get_quantum_state())
                 if print_state:
                     print(description)
@@ -2422,6 +2431,17 @@ class Rotate_Z(GateInstruction):
 
     def getOperation(self) -> CircuitUnitaryOperation:
         return CircuitUnitaryOperation.get_combined_operation_for_rotate_z(self.theta, self.targetQubit, self.totalQubits)
+    
+class U_Gate(GateInstruction):
+    def __init__(self, totalQubits: int, targetQubit: int, theta: float, phi: float, lam: float):
+        self.totalQubits = totalQubits
+        self.targetQubit = targetQubit
+        self.theta = theta
+        self.phi = phi
+        self.lam = lam
+
+    def getOperation(self) -> CircuitUnitaryOperation:
+        return CircuitUnitaryOperation.get_combined_operation_for_u_gate(self.theta, self.phi, self.lam, self.targetQubit, self.totalQubits)
 
 class CNOT(GateInstruction):
     def __init__(self, totalQubits: int, targetQubit: int, controlQubit: int):
@@ -2498,7 +2518,19 @@ class Controlled_Rotate_Z(GateInstruction):
 
     def getOperation(self) -> CircuitUnitaryOperation:
         return CircuitUnitaryOperation.get_combined_operation_for_controlled_rotate_z(self.theta, self.controlQubit, self.targetQubit, self.totalQubits)
-    
+
+class Controlled_U_Gate(GateInstruction):
+    def __init__(self, theta: float, phi: float, lam: float, totalQubits: int, targetQubit: int, controlQubit: int):
+        self.theta = theta
+        self.phi = phi
+        self.lam = lam
+        self.totalQubits = totalQubits
+        self.targetQubit = targetQubit
+        self.controlQubit = controlQubit
+
+    def getOperation(self) -> CircuitUnitaryOperation:
+        return CircuitUnitaryOperation.get_combined_operation_for_controlled_u_gate(self.theta, self.phi, self.lam, self.controlQubit, self.targetQubit, self.totalQubits)
+
 class Controlled_Unitary_Operation(GateInstruction):
     def __init__(self, totalQubits: int, operation, targetQubit: int, controlQubit: int):
         self.totalQubits = totalQubits
@@ -2553,6 +2585,15 @@ class Multi_Controlled_Pauli_X(GateInstruction):
 
     def getOperation(self) -> CircuitUnitaryOperation:
         return CircuitUnitaryOperation.get_combined_operation_for_multi_controlled_pauli_x_operation(self.totalQubits)
+
+class Generic_Toffoli(GateInstruction):
+    def __init__(self, totalQubits: int, controls:list[int], target:int):
+        self.totalQubits = totalQubits
+        self.controls = controls
+        self.target = target
+
+    def getOperation(self) -> CircuitUnitaryOperation:
+        return CircuitUnitaryOperation.get_combined_operation_for_generic_toffoli(self.controls, self.target, self.totalQubits)
     
 class Measurement():
     def __init__(self, measureQubit: int, dataBit: int):
