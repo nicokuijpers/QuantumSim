@@ -29,8 +29,7 @@ An accurate simulation of quantum noise is implemented as described by Di Bartol
 [Noisy gates for simulating quantum computers](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.5.043210)
 
 Noisy quantum gates are implemented in QuantumSim using this approach. See this research paper by Tycho de Laat:
-[Integrating quantum noise into quantum gates for enhanced quantum simulation]
-https://github.com/nicokuijpers/QuantumSim/blob/main/assets/research/TychoDeLaatQuantumNoise.pdf
+[Integrating quantum noise into quantum gates for enhanced quantum simulation](https://github.com/nicokuijpers/QuantumSim/blob/main/assets/research/TychoDeLaatQuantumNoise.pdf)
 
 Jupyter notebook: [QuantumSimNoisyGates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoisyGates.ipynb)
 
