@@ -34,6 +34,8 @@ Contents of this repository:
 | [QuantumSimNoise.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoise.ipynb) | Incoherence and quantum noise |
 | [QuantumSimNoiseBlochSphere.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoiseBlochSphere.ipynb) | Visualisation of (noisy) circuits using Bloch spheres |
 | [QuantumSimNoisyGates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoisyGates.ipynb) | Simulation of noisy quantum gates |
+| [QuantumSimShorNineQubit.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimShorNineQubit.ipynb) | Shor's nine qubit code |
+| [QuantumSimSurfaceCodes.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimSurfaceCode.ipynb) | Surface codes |
 
 
 [bloch_sphere_animation_fourier.mp4](https://github.com/nicokuijpers/QuantumSim/blob/main/assets/videos/bloch_sphere_animation_fourier.mp4)
