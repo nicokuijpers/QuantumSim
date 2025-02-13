@@ -9,7 +9,7 @@ is introduced and visualised with animations using Bloch spheres.
 
 The following Jupyter notebooks explain the connection between quantum information theory and its implementation in Python code:
 * Introduction to QuantumSim [QuantumSimIntroduction.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimIntroduction.ipynb)
-* Visualisation of intermediat quantum states [QuantumSimVisualization.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimVisualization.ipynb)
+* Visualisation of intermediate quantum states [QuantumSimVisualization.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimVisualization.ipynb)
 * More quantum operations with examples [QuantumSimMoreOperations.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimMoreOperations.ipynb)
 * Implementation of the four Bell states [QuantumSimBellStates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBellStates.ipynb)
 * U-gate with examples [QuantumSimUGate.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimUGate.ipynb)
