@@ -1,20 +1,35 @@
 # QuantumSim
 QuantumSim is a quantum computer simulator programmed in Python. This repository contains the python code along with several Jupyter notebooks to explain the code and to illustrate possible usage.
 
+## Getting started
+The main purpose of this simulator is to explain the connection between quantum information theory and its implementation in Python code.
+Intermediate quantum states are visualised to get insight in the effect of quantum operations on the state of a quantum circuit.
+A number of Jupyter notebooks with common quantum algorithms is provided. In addition, the concept of incoherence and quantum noise
+is introduced and visualised with animations using Bloch spheres.
+
+The following Jupyter notebooks explain the connection between quantum information theory and its implementation in Python code:
+* Introduction to QuantumSim [QuantumSimIntroduction.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimIntroduction.ipynb)
+* Visualisation of intermediat quantum states [QuantumSimVisualization.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimVisualization.ipynb)
+* More quantum operations with examples [QuantumSimMoreOperations.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimMoreOperations.ipynb)
+* Implementation of the four Bell states [QuantumSimBellStates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBellStates.ipynb)
+* U-gate with examples [QuantumSimUGate.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimUGate.ipynb)
+* Measuring a single qubit [QuantumSimQubitMeasurement.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQubitMeasurement.ipynb)
+* Resetting a single qubit [QuantumSimQubitReset.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQubitReset.ipynb)
+
 ## Quantum algorithms
 The following quantum algorithms are implemented using QuantumSim:
-* Quantum Teleportation
-* Quantum Fourier Transform
-* Quantum Phase Estimation
-* Shor's Algorithm for finding prime factors of an integer
-* Grover's search algorithm
-* Deutsch-Josza algorithm
-* Bernstein-Vazirani algorithm
-* A counter to count ones in a binary string
-* Application of a counter in Grover's search algorithm to generate binary strings with given number of ones
-* A three-qubit adder
-* Application of a three-qubit adder in Grover's search algorithm to generate all possible $a$ and $b$ for which $a+b=S$, for given $S$
-* Quantum $2 \times 2$ sudoku solver
+* Quantum Teleportation [QuantumSimTeleportation.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimTeleportation.ipynb)
+* Quantum Fourier Transform [QuantumSimFourierTransform.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimFourierTransform.ipynb)
+* Quantum Phase Estimation [QuantumSimPhaseEstimation.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimPhaseEstimation.ipynb)
+* Shor's Algorithm for finding prime factors of an integer [QuantumSimShorAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimShorAlgorithm.ipynb)
+* Grover's search algorithm [QuantumSimGroverAlgorithm.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimGroverAlgorithm.ipynb) 
+* Deutsch-Josza algorithm [QuantumSimDeutschJozsa.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimDeutschJozsa.ipynb)
+* Bernstein-Vazirani algorithm [QuantumSimBernsteinVazirani.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimBernsteinVazirani.ipynb)
+* A counter to count ones in a binary string [QuantumSimCounter.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimCounter.ipynb)
+* Application of a counter in Grover's search algorithm to generate binary strings with given number of ones [QuantumSimCounterGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimCounterGroverSearch.ipynb)
+* A three-qubit adder [QuantumSimThreeQubitAdder.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdder.ipynb)
+* Application of a three-qubit adder in Grover's search algorithm to generate all possible $a$ and $b$ for which $a+b=S$, for given $S$ [QuantumSimThreeQubitAdderGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdderGrover.ipynb) 
+* Quantum $2 \times 2$ sudoku solver  [QuantumSimSudokuSolver.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimSudokuSolver.ipynb)
 
 ## Decomposition of complex quantum gates
 It is possible describe complex quantum gates by circuits composed of basic gates. A decomposition of complex gates is needed when noise
@@ -51,12 +66,6 @@ other simulators. See this research paper by Jelle Maas:
 [QNEX: An intuitive platform for visulizing and analyzing quantum noise in quantum circuits](https://github.com/Typiqally/qnex/blob/main/paper.pdf)
 
 GitHub repository: https://github.com/Typiqally/qnex
-
-## Getting started
-The main purpose of this simulator is to explain the connection between quantum information theory and its implementation in Python code.
-Intermediate quantum states are visualised to get insight in the effect of quantum operations on the state of a quantum circuit.
-A number of Jupyter notebooks with common quantum algorithms is provided. In addition, the concept of incoherence and quantum noise
-is introduced and visualised with animations using Bloch spheres.
 
 Contents of this repository:
 
