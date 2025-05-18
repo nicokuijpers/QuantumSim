@@ -31,6 +31,7 @@ The following quantum algorithms are implemented using QuantumSim:
 * Application of a three-qubit adder in Grover's search algorithm to generate all possible $a$ and $b$ for which $a+b=S$, for given $S$ [QuantumSimThreeQubitAdderGrover.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimThreeQubitAdderGrover.ipynb) 
 * Quantum $2 \times 2$ sudoku solver  [QuantumSimSudokuSolver.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimSudokuSolver.ipynb)
 * Quantum Approximation Optimization Algorithm (QAOA) [QuantumSimQAOA.ipynp](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQAOA.ipynb)
+* Quantum Annealing (QA) [QuantumSimQuantumAnnealing.ipynp](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimQuantumAnnealing.ipynb)
 
 ## Decomposition of complex quantum gates
 It is possible describe complex quantum gates by circuits composed of basic gates. A decomposition of complex gates is needed when noise
