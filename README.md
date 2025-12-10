@@ -69,6 +69,17 @@ other simulators. See this research paper by Jelle Maas:
 
 GitHub repository: https://github.com/Typiqally/qnex
 
+## QuantumSim Performante
+A version of QuantumSim that requires less computational effort and memory was created by Wouter Pennings. The main improvements compared to quantumsim.py can be found in the notebook
+[QuantumSimComputationalImprovements.ipynb](QuantumSimComputationalImprovements.ipynb), 
+and the full implementation in [quantumsim_performante.py](quantumsim_performante.py). 
+This is a minimal version (see: [quantumsim_minima.py](quantumsim_minima.py)), proving that this approach is effective at optimizing QuantumSim.
+
+## Analysis of Quantum Approximate Optimization Algorithm (QAOA)
+An analysis of the performance of Quantum Approximate Optimization Algorithm (QAOA) across various graph types was done with a focus on the MaxCut problem. 
+For this research QuantumSim Performante was applied for simulations without noise. See this research paper by Wouter Pennings:
+[An Analysis of Quantum Approximate Optimization Algorithm Performance Across Various Graph Types](https://github.com/nicokuijpers/QuantumSim/blob/main/assets/research/WouterPenningsQAOA.pdf)
+
 Contents of this repository:
 
 | File | Description |
