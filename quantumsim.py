@@ -484,10 +484,15 @@ class StateVector:
             combined_operation_pauli_x = CircuitUnitaryOperation.get_combined_operation_for_pauli_x(q, self.N)
             self.apply_unitary_operation(combined_operation_pauli_x)
 
-    def noisy_measure(self):
+    def noisy_measure(self, noisy_operations_readout=None):
         # For a noisy circuit, the sum of probabilities may not be equal to one
         probalities = np.square(np.abs(self.state_vector)).flatten()
         probalities = probalities / np.sum(probalities)
+        if noisy_operations_readout != None:
+            for noisy_operation in noisy_operations_readout:
+                probalities = np.dot(noisy_operation, probalities)
+                probalities = np.real(probalities)
+                probalities = probalities / np.sum(probalities)
         self.index = np.random.choice(len(probalities), p=probalities)
 
     def get_quantum_state(self):
@@ -1479,8 +1484,8 @@ Class representing a noisy quantum circuit of N qubits.
 Inherits from Circuit.
 '''
 class NoisyCircuit(Circuit):
-    def __init__(self, N):
-        super().__init__(N)
+    def __init__(self, qubits: int, bits: int=0,  save_instructions: bool=False, noise_factor: float = 1):
+        super().__init__(qubits, bits, save_instructions, noise_factor)
         self.state_vector = StateVector(self.N)
         self.noisy_operations_state_prep = []
         self.noisy_operations_incoherent = []
@@ -1584,7 +1589,8 @@ class NoisyCircuit(Circuit):
             print("Initial quantum state")
             self.state_vector.print()
         for operation, description in zip(self.operations, self.descriptions):
-            self.state_vector.apply_unitary_operation(operation)
+            # Noisy operations need not be unitary
+            self.state_vector.apply_noisy_operation(operation)
             self.quantum_states.append(self.state_vector.get_quantum_state())
             if "Coherent noise" not in description:
                 for noisy_operation in self.noisy_operations_incoherent:
@@ -1601,9 +1607,7 @@ class NoisyCircuit(Circuit):
 
     # Override method measure() from class Circuit
     def measure(self, print_state=False):
-        for noisy_operation in self.noisy_operations_readout:
-            self.state_vector.apply_noisy_operation(noisy_operation)
-        self.state_vector.noisy_measure()
+        self.state_vector.noisy_measure(self.noisy_operations_readout)
         if print_state:
             print("Measured state:")
             print(self.state_vector.get_classical_state_as_string())
@@ -1890,7 +1894,8 @@ class NoisyCircuit(Circuit):
             swap_control = CircuitUnitaryOperation.get_combined_operation_for_swap(1, c_qubit, self.N) if c_qubit != 1 else np.eye(2**self.N)
 
         # Construct the full CNOT operation with swaps
-        operation = swap_control @ swap_target @ cnot_operation @ swap_target.T.conj() @ swap_control.T.conj() 
+        operation = np.dot(np.dot(np.dot(np.dot(swap_control, swap_target), cnot_operation), swap_target.T.conj()), swap_control.T.conj())
+
 
         self.descriptions.append(f"Noisy CNOT with target qubit {t_qubit} and control qubit {c_qubit}")
         self.operations.append(operation)
@@ -3964,6 +3969,16 @@ class NoisyGate:
         tg = 35*10**(-9)
         t_cr = t_cnot/2-tg
         p_cr = (4/3) * (1 - np.sqrt(np.sqrt((1 - (3/4) * p_cnot)**2 / ((1-(3/4)*c_p)**2 * (1-(3/4)*t_p)))))
+        ## DEBUG
+        print('p_cnot = ')
+        print(p_cnot)
+        print('c_p = ')
+        print(c_p)
+        print('t_p = ')
+        print(t_p)
+        print('p_cr = ')
+        print(p_cr)
+        ## END DEBUG
 
         """ 1) CR gate contributions """
         first_cr = NoisyGate.__get_cr_gate_contribution(-np.pi/4, -t_phi, t_cr, p_cr, c_T1, c_T2, t_T1, t_T2)
