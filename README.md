@@ -85,6 +85,8 @@ Contents of this repository:
 | File | Description |
 |------|-------------|
 | [quantumsim.py](https://github.com/nicokuijpers/QuantumSim/blob/main/quantumsim.py) | Contains the Python code of QuantumSim |
+| [quantumsim_minima.py](https://github.com/nicokuijpers/QuantumSim/blob/main/quantumsim_minima.py) | Minimum implementation of QuantumSim |
+| [quantumsim_minima.py](https://github.com/nicokuijpers/QuantumSim/blob/main/quantumsim_performante.py) | Optimized implementation of QuantumSim |
 | [QuantumSimIntroduction.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimIntroduction.ipynb) | Introduction to QuantumSim |
 | [QuantumSimVisualization.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimVisualization.ipynb) | Visualisation of intermediate quantum states |
 | [QuantumSimMoreOperations.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimMoreOperations.ipynb) | More quantum operations with examples |
@@ -112,6 +114,7 @@ Contents of this repository:
 | [QuantumSimNoisyGates.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimNoisyGates.ipynb) | Simulation of noisy quantum gates |
 | [QuantumSimShorNineQubit.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimShorNineQubit.ipynb) | Shor's nine qubit code |
 | [QuantumSimSurfaceCodes.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimSurfaceCodes.ipynb) | Surface codes |
+| [QuantumSimComputationalImprovements.ipynb](https://github.com/nicokuijpers/QuantumSim/blob/main/QuantumSimComputationalImprovements.ipynb) | Computational improvements used in QuantumSim Performante |
 | [SurfaceCodeQuantumSim.py](https://github.com/nicokuijpers/QuantumSim/blob/main/SurfaceCodeQuantumSim.py) | Contains the Python code for surface code |
 
 
